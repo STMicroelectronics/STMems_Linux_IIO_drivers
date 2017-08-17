@@ -1,0 +1,7 @@
+#
+# Temperature sensor drivers
+#
+menu "Temperature sensors"
+
+source "drivers/iio/temperature/hts221/Kconfig"
+endmenu

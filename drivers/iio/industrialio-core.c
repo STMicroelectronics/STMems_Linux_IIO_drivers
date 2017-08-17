@@ -66,6 +66,15 @@ static const char * const iio_chan_type_name_spec[] = {
 	[IIO_ALTVOLTAGE] = "altvoltage",
 	[IIO_CCT] = "cct",
 	[IIO_PRESSURE] = "pressure",
+	[IIO_SIGN_MOTION] = "sign_motion",
+	[IIO_STEP_DETECTOR] = "step_detector",
+	[IIO_STEP_COUNTER] = "step_counter",
+	[IIO_TILT] = "tilt",
+	[IIO_TAP] = "tap",
+	[IIO_TAP_TAP] = "tap_tap",
+	[IIO_HUMIDITYRELATIVE] = "humidityrelative",
+	[IIO_WRIST_TILT_GESTURE] = "wrist",
+	[IIO_GESTURE] = "gesture",
 };
 
 static const char * const iio_modifier_names[] = {
