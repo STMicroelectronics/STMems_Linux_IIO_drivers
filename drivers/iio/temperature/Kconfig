@@ -23,4 +23,5 @@ config TMP006
 	  This driver can also be built as a module. If so, the module will
 	  be called tmp006.
 
+source "drivers/iio/temperature/hts221/Kconfig"
 endmenu

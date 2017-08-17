@@ -80,4 +80,33 @@ config T5403
           To compile this driver as a module, choose M here: the module
           will be called t5403.
 
+#
+# st-lps22hb drivers for STMicroelectronics combo sensor
+#
+
+menuconfig ST_LPS22HB_IIO
+	tristate "STMicroelectronics LPS22HB sensor"
+	depends on (I2C || SPI) && SYSFS
+	select IIO_BUFFER
+	select IIO_TRIGGERED_BUFFER
+	select ST_LPS22HB_I2C_IIO if (I2C)
+	select ST_LPS22HB_SPI_IIO if (SPI)
+	help
+	  This driver supports LPS22HB sensors. This driver can be
+	  built as a module. The module will be called st-lps22hb.
+
+if ST_LPS22HB_IIO
+
+config ST_LPS22HB_I2C_IIO
+	tristate
+	depends on ST_LPS22HB_IIO
+	depends on I2C
+
+config ST_LPS22HB_SPI_IIO
+	tristate
+	depends on ST_LPS22HB_IIO
+	depends on SPI
+
+endif # ST_LPS22HB_IIO
+
 endmenu

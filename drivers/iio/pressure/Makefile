@@ -13,3 +13,9 @@ obj-$(CONFIG_T5403) += t5403.o
 
 obj-$(CONFIG_IIO_ST_PRESS_I2C) += st_pressure_i2c.o
 obj-$(CONFIG_IIO_ST_PRESS_SPI) += st_pressure_spi.o
+
+obj-$(CONFIG_ST_LPS22HB_IIO) += st_lps22hb.o
+obj-$(CONFIG_ST_LPS22HB_I2C_IIO) += st_lps22hb_i2c.o
+obj-$(CONFIG_ST_LPS22HB_SPI_IIO) += st_lps22hb_spi.o
+
+st_lps22hb-y += st_lps22hb_core.o st_lps22hb_buffer.o st_lps22hb_trigger.o
