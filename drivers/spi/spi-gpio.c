@@ -120,7 +120,10 @@ static inline void setmosi(const struct spi_device *spi, int is_on)
 
 static inline int getmiso(const struct spi_device *spi)
 {
-	return !!gpio_get_value_cansleep(SPI_MISO_GPIO);
+	if (spi->mode & SPI_3WIRE)
+		return !!gpio_get_value_cansleep(SPI_MOSI_GPIO);
+	else
+		return !!gpio_get_value_cansleep(SPI_MISO_GPIO);
 }
 
 #undef pdata
@@ -211,6 +214,63 @@ static u32 spi_gpio_spec_txrx_word_mode3(struct spi_device *spi,
 	return bitbang_txrx_be_cpha1(spi, nsecs, 1, flags, word, bits);
 }
 
+/* spi-3wire support */
+static u32 spi_gpio_tx_word_mode0(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha0(spi, nsecs, 0, SPI_MASTER_NO_RX, word,
+				     bits);
+}
+
+static u32 spi_gpio_rx_word_mode0(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha0(spi, nsecs, 0, SPI_MASTER_NO_TX, word,
+				     bits);
+}
+
+static u32 spi_gpio_tx_word_mode1(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha1(spi, nsecs, 0, SPI_MASTER_NO_RX, word,
+				     bits);
+}
+
+static u32 spi_gpio_rx_word_mode1(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha1(spi, nsecs, 0, SPI_MASTER_NO_TX, word,
+				     bits);
+}
+
+static u32 spi_gpio_tx_word_mode2(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha0(spi, nsecs, 1, SPI_MASTER_NO_RX, word,
+				     bits);
+}
+
+static u32 spi_gpio_rx_word_mode2(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha0(spi, nsecs, 1, SPI_MASTER_NO_TX, word,
+				     bits);
+}
+
+static u32 spi_gpio_tx_word_mode3(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha1(spi, nsecs, 1, SPI_MASTER_NO_RX, word,
+				     bits);
+}
+
+static u32 spi_gpio_rx_word_mode3(struct spi_device *spi,
+				  unsigned nsecs, u32 word, u8 bits)
+{
+	return bitbang_txrx_be_cpha1(spi, nsecs, 1, SPI_MASTER_NO_TX, word,
+				     bits);
+}
+
 /*----------------------------------------------------------------------*/
 
 static void spi_gpio_chipselect(struct spi_device *spi, int is_active)
@@ -268,6 +328,20 @@ static int spi_gpio_setup(struct spi_device *spi)
 			gpio_free(cs);
 	}
 	return status;
+}
+
+static int spi_gpio_set_direction(struct spi_device *spi, bool output)
+{
+	struct spi_gpio *spi_gpio;
+	int err;
+
+	spi_gpio = spi_master_get_devdata(spi->master);
+	if (output)
+		err = gpio_direction_output(spi_gpio->pdata.mosi, 1);
+	else
+		err = gpio_direction_input(spi_gpio->pdata.mosi);
+
+	return err;
 }
 
 static void spi_gpio_cleanup(struct spi_device *spi)
@@ -446,6 +520,7 @@ static int spi_gpio_probe(struct platform_device *pdev)
 		spi_gpio->pdata = *pdata;
 
 	master->bits_per_word_mask = SPI_BPW_RANGE_MASK(1, 32);
+	master->mode_bits = SPI_3WIRE | SPI_CPHA | SPI_CPOL;
 	master->flags = master_flags;
 	master->bus_num = pdev->id;
 	master->num_chipselect = num_devices;
@@ -480,12 +555,23 @@ static int spi_gpio_probe(struct platform_device *pdev)
 
 	spi_gpio->bitbang.master = master;
 	spi_gpio->bitbang.chipselect = spi_gpio_chipselect;
+	spi_gpio->bitbang.set_line_direction = spi_gpio_set_direction;
 
 	if ((master_flags & (SPI_MASTER_NO_TX | SPI_MASTER_NO_RX)) == 0) {
 		spi_gpio->bitbang.txrx_word[SPI_MODE_0] = spi_gpio_txrx_word_mode0;
 		spi_gpio->bitbang.txrx_word[SPI_MODE_1] = spi_gpio_txrx_word_mode1;
 		spi_gpio->bitbang.txrx_word[SPI_MODE_2] = spi_gpio_txrx_word_mode2;
 		spi_gpio->bitbang.txrx_word[SPI_MODE_3] = spi_gpio_txrx_word_mode3;
+
+		/* spi 3wire support */
+		spi_gpio->bitbang.tx_word[SPI_MODE_0] = spi_gpio_tx_word_mode0;
+		spi_gpio->bitbang.rx_word[SPI_MODE_0] = spi_gpio_rx_word_mode0;
+		spi_gpio->bitbang.tx_word[SPI_MODE_1] = spi_gpio_tx_word_mode1;
+		spi_gpio->bitbang.rx_word[SPI_MODE_1] = spi_gpio_rx_word_mode1;
+		spi_gpio->bitbang.tx_word[SPI_MODE_2] = spi_gpio_tx_word_mode2;
+		spi_gpio->bitbang.rx_word[SPI_MODE_2] = spi_gpio_rx_word_mode2;
+		spi_gpio->bitbang.tx_word[SPI_MODE_3] = spi_gpio_tx_word_mode3;
+		spi_gpio->bitbang.rx_word[SPI_MODE_3] = spi_gpio_rx_word_mode3;
 	} else {
 		spi_gpio->bitbang.txrx_word[SPI_MODE_0] = spi_gpio_spec_txrx_word_mode0;
 		spi_gpio->bitbang.txrx_word[SPI_MODE_1] = spi_gpio_spec_txrx_word_mode1;

@@ -50,6 +50,10 @@ struct spi_bitbang_cs {
 	unsigned	nsecs;	/* (clock cycle time)/2 */
 	u32		(*txrx_word)(struct spi_device *spi, unsigned nsecs,
 					u32 word, u8 bits);
+	u32		(*tx_word)(struct spi_device *spi, unsigned nsecs,
+				   u32 word, u8 bits);
+	u32		(*rx_word)(struct spi_device *spi, unsigned nsecs,
+				   u32 word, u8 bits);
 	unsigned	(*txrx_bufs)(struct spi_device *,
 					u32 (*txrx_word)(
 						struct spi_device *spi,
@@ -197,6 +201,13 @@ int spi_bitbang_setup(struct spi_device *spi)
 	if (!cs->txrx_word)
 		return -EINVAL;
 
+	if (spi->mode & SPI_3WIRE) {
+		cs->tx_word = bitbang->tx_word[spi->mode & (SPI_CPOL|SPI_CPHA)];
+		cs->rx_word = bitbang->rx_word[spi->mode & (SPI_CPOL|SPI_CPHA)];
+		if (!cs->tx_word || !cs->rx_word)
+			return -EINVAL;
+	}
+
 	if (bitbang->setup_transfer) {
 		int retval = bitbang->setup_transfer(spi, NULL);
 		if (retval < 0)
@@ -236,7 +247,22 @@ static int spi_bitbang_bufs(struct spi_device *spi, struct spi_transfer *t)
 	struct spi_bitbang_cs	*cs = spi->controller_state;
 	unsigned		nsecs = cs->nsecs;
 
-	return cs->txrx_bufs(spi, cs->txrx_word, nsecs, t);
+	if (spi->mode & SPI_3WIRE) {
+		struct spi_bitbang *bitbang;
+		int err;
+
+		bitbang = spi_master_get_devdata(spi->master);
+		err = bitbang->set_line_direction(spi, !!(t->tx_buf));
+		if (err < 0)
+			return err;
+
+		if (t->tx_buf)
+			return cs->txrx_bufs(spi, cs->tx_word, nsecs, t);
+		else
+			return cs->txrx_bufs(spi, cs->rx_word, nsecs, t);
+	} else {
+		return cs->txrx_bufs(spi, cs->txrx_word, nsecs, t);
+	}
 }
 
 /*----------------------------------------------------------------------*/

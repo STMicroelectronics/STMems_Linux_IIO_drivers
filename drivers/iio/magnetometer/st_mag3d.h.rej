@@ -1,0 +1,15 @@
+--- drivers/iio/magnetometer/st_mag3d.h
++++ drivers/iio/magnetometer/st_mag3d.h
+@@ -12,9 +12,10 @@
+ #define __ST_MAG3D_H
+ 
+ #define LIS3MDL_DEV_NAME		"lis3mdl_magn"
++#define LSM9DS1_DEV_NAME		"lsm9ds1_magn"
+ 
+-#define ST_MAG3D_TX_MAX_LENGTH	16
+-#define ST_MAG3D_RX_MAX_LENGTH	16
++#define ST_MAG3D_TX_MAX_LENGTH		16
++#define ST_MAG3D_RX_MAX_LENGTH		16
+ 
+ #define ST_MAG3D_SAMPLE_SIZE		6
+ 

@@ -77,6 +77,13 @@ static const char * const iio_chan_type_name_spec[] = {
 	[IIO_VELOCITY] = "velocity",
 	[IIO_CONCENTRATION] = "concentration",
 	[IIO_RESISTANCE] = "resistance",
+	[IIO_SIGN_MOTION] = "sign_motion",
+	[IIO_STEP_DETECTOR] = "step_detector",
+	[IIO_STEP_COUNTER] = "step_counter",
+	[IIO_TILT] = "tilt",
+	[IIO_TAP] = "tap",
+	[IIO_TAP_TAP] = "tap_tap",
+	[IIO_GESTURE] = "gesture",
 };
 
 static const char * const iio_modifier_names[] = {
@@ -115,6 +122,7 @@ static const char * const iio_modifier_names[] = {
 	[IIO_MOD_Q] = "q",
 	[IIO_MOD_CO2] = "co2",
 	[IIO_MOD_VOC] = "voc",
+	[IIO_WRIST_TILT_GESTURE] = "wrist",
 };
 
 /* relies on pairs of these shared then separate */

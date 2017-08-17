@@ -30,6 +30,11 @@ struct spi_bitbang {
 	u32	(*txrx_word[4])(struct spi_device *spi,
 			unsigned nsecs,
 			u32 word, u8 bits);
+	int	(*set_line_direction)(struct spi_device *spi, bool output);
+	u32	(*tx_word[4])(struct spi_device *spi,
+			      unsigned nsecs, u32 word, u8 bits);
+	u32	(*rx_word[4])(struct spi_device *spi,
+			      unsigned nsecs, u32 word, u8 bits);
 };
 
 /* you can call these default bitbang->master methods from your custom
