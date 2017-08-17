@@ -3,3 +3,4 @@
 #
 
 obj-$(CONFIG_TMP006) += tmp006.o
+obj-$(CONFIG_IIO_HTS221) += hts221/

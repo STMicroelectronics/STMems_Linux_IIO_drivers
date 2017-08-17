@@ -14,3 +14,7 @@ adis_lib-$(CONFIG_IIO_ADIS_LIB_BUFFER) += adis_buffer.o
 obj-$(CONFIG_IIO_ADIS_LIB) += adis_lib.o
 
 obj-y += inv_mpu6050/
+obj-y += st_imu68/
+obj-y += st_lsm6ds3/
+obj-y += st_lsm6ds3h/
+obj-y += st_lsm6dsm/
