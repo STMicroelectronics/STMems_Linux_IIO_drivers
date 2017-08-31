@@ -12,6 +12,7 @@
 #define ST_ACC33_H
 
 #define LIS2DH_DEV_NAME			"lis2dh_accel"
+#define LIS2DH12_DEV_NAME		"lis2dh12_accel"
 #define LIS3DH_DEV_NAME			"lis3dh_accel"
 #define LSM303AGR_DEV_NAME		"lsm303agr_accel"
 

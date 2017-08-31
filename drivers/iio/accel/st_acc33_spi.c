@@ -86,6 +86,10 @@ static const struct of_device_id st_acc33_spi_of_match[] = {
 		.data = LIS2DH_DEV_NAME,
 	},
 	{
+		.compatible = "st,lis2dh12_accel",
+		.data = LIS2DH12_DEV_NAME,
+	},
+	{
 		.compatible = "st,lis3dh_accel",
 		.data = LIS3DH_DEV_NAME,
 	},
@@ -99,6 +103,7 @@ MODULE_DEVICE_TABLE(of, st_acc33_spi_of_match);
 
 static const struct spi_device_id st_acc33_spi_id_table[] = {
 	{ LIS2DH_DEV_NAME },
+	{ LIS2DH12_DEV_NAME },
 	{ LIS3DH_DEV_NAME },
 	{ LSM303AGR_DEV_NAME },
 	{},
