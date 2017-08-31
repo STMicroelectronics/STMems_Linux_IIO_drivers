@@ -35,6 +35,7 @@
 #define ST_GYRO_DEFAULT_OUT_Z_L_ADDR		0x2c
 
 /* FULLSCALE */
+#define ST_GYRO_FS_AVL_245DPS			245
 #define ST_GYRO_FS_AVL_250DPS			250
 #define ST_GYRO_FS_AVL_500DPS			500
 #define ST_GYRO_FS_AVL_2000DPS			2000
@@ -86,6 +87,19 @@
 #define ST_GYRO_2_DRDY_IRQ_ADDR			0x22
 #define ST_GYRO_2_DRDY_IRQ_INT2_MASK		0x08
 #define ST_GYRO_2_MULTIREAD_BIT			true
+
+/* CUSTOM VALUES FOR SENSOR 3 */
+#define ST_GYRO_3_WAI_EXP			0xd7
+#define ST_GYRO_3_ODR_AVL_100HZ_VAL		0x00
+#define ST_GYRO_3_ODR_AVL_200HZ_VAL		0x01
+#define ST_GYRO_3_ODR_AVL_400HZ_VAL		0x02
+#define ST_GYRO_3_ODR_AVL_800HZ_VAL		0x03
+#define ST_GYRO_3_FS_AVL_450_VAL		0x00
+#define ST_GYRO_3_FS_AVL_500_VAL		0x01
+#define ST_GYRO_3_FS_AVL_2000_VAL		0x02
+#define ST_GYRO_3_FS_AVL_245_GAIN		IIO_DEGREE_TO_RAD(8750)
+#define ST_GYRO_3_FS_AVL_500_GAIN		IIO_DEGREE_TO_RAD(17500)
+#define ST_GYRO_3_FS_AVL_2000_GAIN		IIO_DEGREE_TO_RAD(70000)
 
 static const struct iio_chan_spec st_gyro_16bit_channels[] = {
 	ST_SENSORS_LSM_CHANNELS(IIO_ANGL_VEL,
@@ -211,6 +225,64 @@ static const struct st_sensors st_gyro_sensors[] = {
 					.num = ST_GYRO_FS_AVL_2000DPS,
 					.value = ST_GYRO_2_FS_AVL_2000_VAL,
 					.gain = ST_GYRO_2_FS_AVL_2000_GAIN,
+				},
+			},
+		},
+		.bdu = {
+			.addr = ST_GYRO_2_BDU_ADDR,
+			.mask = ST_GYRO_2_BDU_MASK,
+		},
+		.drdy_irq = {
+			.addr = ST_GYRO_2_DRDY_IRQ_ADDR,
+			.mask_int2 = ST_GYRO_2_DRDY_IRQ_INT2_MASK,
+		},
+		.multi_read_bit = ST_GYRO_2_MULTIREAD_BIT,
+		.bootime = 2,
+	},
+	{
+		.wai = ST_GYRO_3_WAI_EXP,
+		.sensors_supported = {
+			[0] = L3GD20H_GYRO_DEV_NAME,
+		},
+		.ch = (struct iio_chan_spec *)st_gyro_16bit_channels,
+		.odr = {
+			.addr = ST_GYRO_2_ODR_ADDR,
+			.mask = ST_GYRO_2_ODR_MASK,
+			.odr_avl = {
+				{ 100, ST_GYRO_3_ODR_AVL_100HZ_VAL, },
+				{ 200, ST_GYRO_3_ODR_AVL_200HZ_VAL, },
+				{ 400, ST_GYRO_3_ODR_AVL_400HZ_VAL, },
+				{ 800, ST_GYRO_3_ODR_AVL_800HZ_VAL, },
+			},
+		},
+		.pw = {
+			.addr = ST_GYRO_2_PW_ADDR,
+			.mask = ST_GYRO_2_PW_MASK,
+			.value_on = ST_SENSORS_DEFAULT_POWER_ON_VALUE,
+			.value_off = ST_SENSORS_DEFAULT_POWER_OFF_VALUE,
+		},
+		.enable_axis = {
+			.addr = ST_SENSORS_DEFAULT_AXIS_ADDR,
+			.mask = ST_SENSORS_DEFAULT_AXIS_MASK,
+		},
+		.fs = {
+			.addr = ST_GYRO_2_FS_ADDR,
+			.mask = ST_GYRO_2_FS_MASK,
+			.fs_avl = {
+				[0] = {
+					.num = ST_GYRO_FS_AVL_245DPS,
+					.value = ST_GYRO_3_FS_AVL_450_VAL,
+					.gain = ST_GYRO_3_FS_AVL_245_GAIN,
+				},
+				[1] = {
+					.num = ST_GYRO_FS_AVL_500DPS,
+					.value = ST_GYRO_3_FS_AVL_500_VAL,
+					.gain = ST_GYRO_3_FS_AVL_500_GAIN,
+				},
+				[2] = {
+					.num = ST_GYRO_FS_AVL_2000DPS,
+					.value = ST_GYRO_3_FS_AVL_2000_VAL,
+					.gain = ST_GYRO_3_FS_AVL_2000_GAIN,
 				},
 			},
 		},
