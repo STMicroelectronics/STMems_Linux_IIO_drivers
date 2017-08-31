@@ -44,7 +44,7 @@ config HID_SENSOR_ACCEL_3D
 	  accelerometers 3D.
 
 config IIO_ST_ACC33
-	tristate "STMicroelectronics LIS3DH/LIS2DH/LSM303AGR Accelerometer driver"
+	tristate "STMicroelectronics LIS3DH/LIS2DH/LIS2DH12/LSM303AGR Accelerometer driver"
 	depends on (I2C || SPI_MASTER) && SYSFS
 	select IIO_ST_ACC33_I2C if (I2C)
 	select IIO_ST_ACC33_SPI if (SPI_MASTER)
@@ -52,7 +52,7 @@ config IIO_ST_ACC33
 	select IIO_KFIFO_BUF
 	help
 	  Say yes here to build support for STMicroelectronics accelerometers:
-	  LIS3DH, LIS2DH, LSM303AGR.
+	  LIS3DH, LIS2DH, LIS2DH12, LSM303AGR.
 
 	  This driver can also be built as a module. If so, will be created
 	  these modules:
