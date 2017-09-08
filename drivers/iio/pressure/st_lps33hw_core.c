@@ -463,7 +463,7 @@ int st_lps33hw_common_probe(struct device *dev, int irq, const char *name,
 
 	err = st_lps33hw_init_sensors(hw);
 	if (err < 0)
-		return err;
+		goto iio_alloc_fail;
 
 	if (irq > 0) {
 		err = st_lps33hw_allocate_buffers(hw);
