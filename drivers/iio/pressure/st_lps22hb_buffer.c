@@ -1,226 +1,306 @@
 /*
- * STMicroelectronics lps22hb driver
+ * STMicroelectronics lps22hb buffer driver
  *
- * Copyright 2016 STMicroelectronics Inc.
+ * Copyright 2017 STMicroelectronics Inc.
  *
- * Matteo Dameno <matteo.dameno@st.com>
- * Armando Visconti <armando.visconti@st.com>
+ * Lorenzo Bianconi <lorenzo.bianconi@st.com>
  *
  * Licensed under the GPL-2.
  */
 
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/slab.h>
-#include <linux/stat.h>
 #include <linux/interrupt.h>
-#include <linux/delay.h>
 #include <linux/iio/iio.h>
 #include <linux/iio/buffer.h>
-#include <linux/iio/trigger_consumer.h>
-#include <linux/iio/triggered_buffer.h>
+#include <linux/iio/kfifo_buf.h>
+#include <linux/iio/events.h>
 
-#include "st_lps22hb_core.h"
+#include "st_lps22hb.h"
 
-#define LPS22HB_PRESS_BUFFER_SIZE \
-		ALIGN(LPS22HB_FIFO_BYTE_FOR_SAMPLE_PRESS + LPS22HB_TIMESTAMP_SIZE, \
-		      LPS22HB_TIMESTAMP_SIZE)
-#define LPS22HB_TEMP_BUFFER_SIZE \
-		ALIGN(LPS22HB_FIFO_BYTE_FOR_SAMPLE_TEMP + LPS22HB_TIMESTAMP_SIZE, \
-		      LPS22HB_TIMESTAMP_SIZE)
+#define ST_LPS22HB_FIFO_CTRL_ADDR		0x14
+#define ST_LPS22HB_FIFO_THS_MASK		0x1f
+#define ST_LPS22HB_FIFO_MODE_MASK		0xe0
+#define ST_LPS22HB_INT_FTH_MASK			0x10
 
-static void lps22hb_push_fifo_data(struct lps22hb_data *cdata, u16 read_length)
+#define ST_LPS22HB_FIFO_SRC_ADDR		0x26
+#define ST_LPS22HB_FIFO_SRC_DIFF_MASK		0x3f
+
+#define ST_LPS22HB_PRESS_OUT_XL_ADDR		0x28
+
+#define ST_LPS22HB_PRESS_SAMPLE_LEN		3
+#define ST_LPS22HB_TEMP_SAMPLE_LEN		2
+#define ST_LPS22HB_FIFO_SAMPLE_LEN		(ST_LPS22HB_PRESS_SAMPLE_LEN + \
+						 ST_LPS22HB_TEMP_SAMPLE_LEN)
+
+static inline s64 st_lps22hb_get_time_ns(void)
 {
-	size_t offset;
-	uint16_t k;
-	u8 bufferP[LPS22HB_PRESS_BUFFER_SIZE], out_buf_indexP;
-	u8 bufferT[LPS22HB_TEMP_BUFFER_SIZE], out_buf_indexT;
-	struct iio_dev *indio_devP = cdata->iio_sensors_dev[LPS22HB_PRESS];
-	struct iio_dev *indio_devT = cdata->iio_sensors_dev[LPS22HB_TEMP];
-	struct lps22hb_sensor_data *sdata;
+	struct timespec ts;
 
-	out_buf_indexP = 0;
-	out_buf_indexT = 0;
+	get_monotonic_boottime(&ts);
 
-	/* Pressure data */
-	sdata = iio_priv(indio_devP);
-	if (sdata->enabled) {
-		k = 0;
-
-		if (indio_devP->active_scan_mask &&
-						test_bit(0, indio_devP->active_scan_mask)) {
-			memcpy(&bufferP[out_buf_indexP], &cdata->fifo_data[k],
-									LPS22HB_FIFO_BYTE_FOR_SAMPLE_PRESS);
-			out_buf_indexP += LPS22HB_FIFO_BYTE_FOR_SAMPLE_PRESS;
-		}
-
-		if (indio_devP->scan_timestamp) {
-			offset = indio_devP->scan_bytes / sizeof(s64) - 1;
-			((s64 *)bufferP)[offset] = cdata->prev_timestamp;
-		}
-
-		iio_push_to_buffers(indio_devP, bufferP);
-	}
-
-	/* Temperature data */
-	sdata = iio_priv(indio_devT);
-	if (sdata->enabled) {
-		k = LPS22HB_FIFO_BYTE_FOR_SAMPLE_PRESS;
-
-		if (indio_devT->active_scan_mask &&
-					test_bit(0, indio_devT->active_scan_mask)) {
-			memcpy(&bufferT[out_buf_indexT], &cdata->fifo_data[k],
-					LPS22HB_FIFO_BYTE_FOR_SAMPLE_TEMP);
-			out_buf_indexT += LPS22HB_FIFO_BYTE_FOR_SAMPLE_TEMP;
-		}
-
-		if (indio_devT->scan_timestamp) {
-			offset = indio_devT->scan_bytes / sizeof(s64) - 1;
-			((s64 *)bufferT)[offset] = cdata->prev_timestamp;
-		}
-
-		iio_push_to_buffers(indio_devT, bufferT);
-	}
+	return timespec_to_ns(&ts);
 }
 
-void lps22hb_flush_fifo(struct lps22hb_data *cdata, u8 fifo_src)
+#define ST_LPS22HB_EWMA_LEVEL			96
+#define ST_LPS22HB_EWMA_DIV			128
+static inline s64 st_lps22hb_ewma(s64 old, s64 new, int weight)
+{
+	s64 diff, incr;
+
+	diff = new - old;
+	incr = div_s64((ST_LPS22HB_EWMA_DIV - weight) * diff,
+		       ST_LPS22HB_EWMA_DIV);
+
+	return old + incr;
+}
+
+static int st_lps22hb_set_fifo_mode(struct st_lps22hb_hw *hw,
+				    enum st_lps22hb_fifo_mode mode)
+{
+	switch (mode) {
+	case ST_LPS22HB_BYPASS:
+	case ST_LPS22HB_STREAM:
+		break;
+	default:
+		return -EINVAL;
+	}
+	return st_lps22hb_write_with_mask(hw, ST_LPS22HB_FIFO_CTRL_ADDR,
+					  ST_LPS22HB_FIFO_MODE_MASK, mode);
+}
+
+static int st_lps22hb_update_fifo_watermark(struct st_lps22hb_hw *hw, u8 val)
 {
 	int err;
-	u16 read_len = cdata->fifo_size;
-	uint16_t i;
-	u32 delta = 0;
 
-	if (!cdata->fifo_data)
-		return;
-
-	read_len = (fifo_src & LPS22HB_FIFO_SRC_DIFF_MASK);
-	if (read_len)
-		delta = div_s64(cdata->delta_ts, read_len);
-
-	read_len *= LPS22HB_FIFO_BYTE_FOR_SAMPLE;
-	err = lps22hb_read_register(cdata, LPS22HB_PRESS_OUT_XL_ADDR,
-				    read_len, cdata->fifo_data);
+	err = st_lps22hb_write_with_mask(hw, ST_LPS22HB_FIFO_CTRL_ADDR,
+					 ST_LPS22HB_FIFO_THS_MASK, val);
 	if (err < 0)
-		return;
+		return err;
 
-	for (i = 0; i < read_len; i += LPS22HB_FIFO_BYTE_FOR_SAMPLE) {
-		lps22hb_push_fifo_data(cdata, LPS22HB_FIFO_BYTE_FOR_SAMPLE);
-		cdata->prev_timestamp += delta;
-	}
+	hw->watermark = val;
+
+	return 0;
 }
 
-void lps22hb_read_fifo(struct lps22hb_data *cdata, bool check_fifo_len, bool push)
+ssize_t st_lps22hb_sysfs_set_hwfifo_watermark(struct device * dev,
+					      struct device_attribute * attr,
+					      const char *buf, size_t count)
 {
-	int err;
-	u8 fifo_src;
-	u16 read_len = cdata->fifo_size;
-	uint16_t i;
-	u32 delta = 0;
+	struct st_lps22hb_sensor *sensor = iio_priv(dev_get_drvdata(dev));
+	int err, watermark;
 
-	if (!cdata->fifo_data)
-		return;
+	err = kstrtoint(buf, 10, &watermark);
+	if (err < 0)
+		return err;
 
-	if (check_fifo_len) {
-		err = lps22hb_read_register(cdata, LPS22HB_FIFO_SRC_ADDR, 1, &fifo_src);
-		if (err < 0)
-			return;
+	if (watermark < 1 || watermark > ST_LPS22HB_MAX_FIFO_LENGTH)
+		return -EINVAL;
 
-		read_len = (fifo_src & LPS22HB_FIFO_SRC_DIFF_MASK);
-		if (read_len)
-			delta = div_s64(cdata->delta_ts, read_len);
-		read_len *= LPS22HB_FIFO_BYTE_FOR_SAMPLE;
+	err = st_lps22hb_update_fifo_watermark(sensor->hw, watermark);
 
-		if (read_len > cdata->fifo_size)
-			read_len = cdata->fifo_size;
-	} else
-		delta = div_s64(cdata->delta_ts, cdata->hwfifo_watermark);
-
-	for (i = 0; i < read_len; i += LPS22HB_FIFO_BYTE_FOR_SAMPLE) {
-		err = lps22hb_read_register(cdata, LPS22HB_PRESS_OUT_XL_ADDR,
-					    LPS22HB_FIFO_BYTE_FOR_SAMPLE,
-					    cdata->fifo_data);
-		if (err < 0)
-			return;
-
-		if (push) {
-			lps22hb_push_fifo_data(cdata, LPS22HB_FIFO_BYTE_FOR_SAMPLE);
-			cdata->prev_timestamp += delta;
-		}
-	}
+	return err < 0 ? err : count;
 }
 
-static inline irqreturn_t lps22hb_handler_empty(int irq, void *p)
+static int st_lps22hb_read_fifo(struct st_lps22hb_hw *hw)
 {
+	u8 iio_buff[ALIGN(sizeof(u32) + sizeof(s64), sizeof(s64))];
+	u8 status, buff[ST_LPS22HB_FIFO_SAMPLE_LEN];
+	int err, i, fifo_depth;
+
+	err = hw->tf->read(hw->dev, ST_LPS22HB_FIFO_SRC_ADDR,
+			   sizeof(status), &status);
+	if (err < 0)
+		return err;
+
+	fifo_depth = (status & ST_LPS22HB_FIFO_SRC_DIFF_MASK);
+	for (i = 0; i < fifo_depth; i++) {
+		err = hw->tf->read(hw->dev, ST_LPS22HB_PRESS_OUT_XL_ADDR,
+				   sizeof(buff), buff);
+		if (err < 0)
+			return err;
+		/* press sample */
+		memcpy(iio_buff, buff, ST_LPS22HB_PRESS_SAMPLE_LEN);
+		iio_push_to_buffers_with_timestamp(
+				hw->iio_devs[ST_LPS22HB_PRESS],
+				iio_buff, hw->ts);
+		/* temp sample */
+		memcpy(iio_buff, buff + ST_LPS22HB_PRESS_SAMPLE_LEN,
+		       ST_LPS22HB_TEMP_SAMPLE_LEN);
+		iio_push_to_buffers_with_timestamp(
+				hw->iio_devs[ST_LPS22HB_TEMP],
+				iio_buff, hw->ts);
+		hw->ts += hw->delta_ts;
+	}
+
+	return fifo_depth;
+}
+
+ssize_t st_lps22hb_sysfs_flush_fifo(struct device *dev,
+				    struct device_attribute *attr,
+				    const char *buf, size_t size)
+{
+	struct iio_dev *indio_dev = dev_get_drvdata(dev);
+	struct st_lps22hb_sensor *sensor = iio_priv(indio_dev);
+	struct st_lps22hb_hw *hw = sensor->hw;
+	u64 type, event;
+	int len;
+
+	mutex_lock(&indio_dev->mlock);
+	if (!iio_buffer_enabled(indio_dev)) {
+		mutex_unlock(&indio_dev->mlock);
+		return -EINVAL;
+	}
+
+	mutex_lock(&hw->fifo_lock);
+	len = st_lps22hb_read_fifo(hw);
+	mutex_unlock(&hw->fifo_lock);
+
+	type = len > 0 ? IIO_EV_DIR_FIFO_DATA : IIO_EV_DIR_FIFO_EMPTY;
+	if (sensor->type == ST_LPS22HB_PRESS)
+		event = IIO_UNMOD_EVENT_CODE(IIO_PRESSURE, -1,
+					     IIO_EV_TYPE_FIFO_FLUSH, type);
+	else
+		event = IIO_UNMOD_EVENT_CODE(IIO_TEMP, -1,
+					     IIO_EV_TYPE_FIFO_FLUSH, type);
+	iio_push_event(indio_dev, event, st_lps22hb_get_time_ns());
+	mutex_unlock(&indio_dev->mlock);
+
+	return size;
+}
+
+
+static irqreturn_t st_lps22hb_irq_handler(int irq, void *private)
+{
+	s64 delta_ts, ts = st_lps22hb_get_time_ns();
+	struct st_lps22hb_hw *hw = private;
+
+	delta_ts = div_s64((ts - hw->ts_irq), hw->watermark);
+	if (hw->odr >= 50)
+		hw->delta_ts = st_lps22hb_ewma(hw->delta_ts, delta_ts,
+					       ST_LPS22HB_EWMA_LEVEL);
+	else
+		hw->delta_ts = delta_ts;
+	hw->ts_irq = ts;
+
+	return IRQ_WAKE_THREAD;
+}
+
+static irqreturn_t st_lps22hb_irq_thread(int irq, void *private)
+{
+	struct st_lps22hb_hw *hw = private;
+
+	mutex_lock(&hw->fifo_lock);
+	st_lps22hb_read_fifo(hw);
+	mutex_unlock(&hw->fifo_lock);
+
 	return IRQ_HANDLED;
 }
 
-int lps22hb_trig_set_state(struct iio_trigger *trig, bool state)
+static int st_lps22hb_buffer_preenable(struct iio_dev *indio_dev)
 {
-	return 0;
-}
-
-static int lps22hb_buffer_preenable(struct iio_dev *indio_dev)
-{
+	struct st_lps22hb_sensor *sensor = iio_priv(indio_dev);
+	struct st_lps22hb_hw *hw = sensor->hw;
 	int err;
-	struct lps22hb_sensor_data *sdata = iio_priv(indio_dev);
 
-	err = lps22hb_set_enable(sdata, true);
+	err = st_lps22hb_set_fifo_mode(sensor->hw, ST_LPS22HB_STREAM);
 	if (err < 0)
 		return err;
 
-	return 0;
-}
-
-static int lps22hb_buffer_postdisable(struct iio_dev *indio_dev)
-{
-	int err;
-	struct lps22hb_sensor_data *sdata = iio_priv(indio_dev);
-
-	err = lps22hb_set_enable(sdata, false);
+	err = st_lps22hb_update_fifo_watermark(hw, hw->watermark);
 	if (err < 0)
 		return err;
 
+	err = st_lps22hb_write_with_mask(sensor->hw, ST_LPS22HB_CTRL3_ADDR,
+					 ST_LPS22HB_INT_FTH_MASK, true);
+	if (err < 0)
+		return err;
+
+	err = st_lps22hb_set_enable(sensor, true);
+	if (err < 0)
+		return err;
+
+	hw->delta_ts = div_s64(1000000000UL, hw->odr);
+	hw->ts = st_lps22hb_get_time_ns();
+	hw->ts_irq = hw->ts;
+
 	return 0;
 }
 
-static const struct iio_buffer_setup_ops lps22hb_buffer_setup_ops = {
-	.preenable = &lps22hb_buffer_preenable,
-	.postenable = &iio_triggered_buffer_postenable,
-	.predisable = &iio_triggered_buffer_predisable,
-	.postdisable = &lps22hb_buffer_postdisable,
+static int st_lps22hb_buffer_postdisable(struct iio_dev *indio_dev)
+{
+	struct st_lps22hb_sensor *sensor = iio_priv(indio_dev);
+	int err;
+
+	err = st_lps22hb_set_fifo_mode(sensor->hw, ST_LPS22HB_BYPASS);
+	if (err < 0)
+		return err;
+
+	err = st_lps22hb_write_with_mask(sensor->hw, ST_LPS22HB_CTRL3_ADDR,
+					 ST_LPS22HB_INT_FTH_MASK, false);
+	if (err < 0)
+		return err;
+
+	return st_lps22hb_set_enable(sensor, false);
+}
+
+static const struct iio_buffer_setup_ops st_lps22hb_buffer_ops = {
+	.preenable = st_lps22hb_buffer_preenable,
+	.postdisable = st_lps22hb_buffer_postdisable,
 };
 
-int lps22hb_allocate_rings(struct lps22hb_data *cdata)
+int st_lps22hb_allocate_buffers(struct st_lps22hb_hw *hw)
 {
+	struct iio_buffer *buffer;
 	int err, i;
 
-	for (i = 0; i < LPS22HB_SENSORS_NUMB; i++) {
-		err = iio_triggered_buffer_setup(
-				cdata->iio_sensors_dev[i],
-				&lps22hb_handler_empty,
-				NULL,
-				&lps22hb_buffer_setup_ops);
-		if (err < 0)
-			goto buffer_cleanup;
-	}
+	err = devm_request_threaded_irq(hw->dev, hw->irq,
+					st_lps22hb_irq_handler,
+					st_lps22hb_irq_thread,
+					IRQF_TRIGGER_HIGH | IRQF_ONESHOT,
+					"lps22hb", hw);
+	if (err)
+		return err;
 
+	for (i = 0; i < ST_LPS22HB_SENSORS_NUMB; i++) {
+		buffer = iio_kfifo_allocate(hw->iio_devs[i]);
+		if (!buffer) {
+			err = -ENOMEM;
+			goto fifo_allocate_error;
+		}
+
+		iio_device_attach_buffer(hw->iio_devs[i], buffer);
+		hw->iio_devs[i]->modes |= INDIO_BUFFER_HARDWARE;
+		hw->iio_devs[i]->setup_ops = &st_lps22hb_buffer_ops;
+
+		err = iio_buffer_register(hw->iio_devs[i],
+					  hw->iio_devs[i]->channels,
+					  hw->iio_devs[i]->num_channels);
+		if (err)
+			goto fifo_allocate_error;
+	}
 	return 0;
 
-buffer_cleanup:
+fifo_allocate_error:
 	for (i--; i >= 0; i--)
-		iio_triggered_buffer_cleanup(cdata->iio_sensors_dev[i]);
-
+		iio_buffer_unregister(hw->iio_devs[i]);
+	for (i = 0; i < ST_LPS22HB_SENSORS_NUMB; i++) {
+		if (!hw->iio_devs[i]->buffer)
+			continue;
+		iio_kfifo_free(hw->iio_devs[i]->buffer);
+	}
 	return err;
 }
 
-void lps22hb_deallocate_rings(struct lps22hb_data *cdata)
+int st_lps22hb_deallocate_buffers(struct st_lps22hb_hw *hw)
 {
 	int i;
 
-	for (i = 0; i < LPS22HB_SENSORS_NUMB; i++)
-		iio_triggered_buffer_cleanup(cdata->iio_sensors_dev[i]);
+	for (i = 0; i < ST_LPS22HB_SENSORS_NUMB; i++) {
+		iio_buffer_unregister(hw->iio_devs[i]);
+		iio_kfifo_free(hw->iio_devs[i]->buffer);
+	}
+	return 0;
 }
 
-MODULE_DESCRIPTION("STMicroelectronics lps22hb driver");
-MODULE_AUTHOR("Armando Visconti <armando.visconti@st.com>");
+MODULE_DESCRIPTION("STMicroelectronics lps22hb buffer driver");
+MODULE_AUTHOR("Lorenzo Bianconi <lorenzo.bianconi@st.com>");
 MODULE_LICENSE("GPL v2");
