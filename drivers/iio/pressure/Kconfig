@@ -81,14 +81,14 @@ config T5403
           will be called t5403.
 
 config ST_LPS22HB_IIO
-	tristate "STMicroelectronics LPS22HB sensor"
+	tristate "STMicroelectronics LPS22HB/LPS22HD sensor"
 	depends on (I2C || SPI_MASTER) && SYSFS
 	select IIO_BUFFER
 	select IIO_KFIFO_BUF
 	select ST_LPS22HB_I2C_IIO if (I2C)
 	select ST_LPS22HB_SPI_IIO if (SPI)
 	help
-	  This driver supports LPS22HB sensors. This driver can be
+	  This driver supports LPS22HB/LPS22HD sensors. This driver can be
 	  built as a module. The module will be called st-lps22hb.
 
 config ST_LPS22HB_I2C_IIO
