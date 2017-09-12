@@ -34,7 +34,7 @@ This repository contains Linux kernel (v3.10, v3.14, v3.18, v4.4) with STMicroel
 
 ### Pressure:
 
-> LPS22HB, LPS25H, LPS331AP, LPS001WP, LPS33HW, LPS35HW
+> LPS22HB, LPS22HD, LPS25H, LPS331AP, LPS001WP, LPS33HW, LPS35HW
 
 
 
