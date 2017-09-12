@@ -22,7 +22,7 @@ This repository contains Linux kernel (v3.10, v3.14, v3.18, v4.4) with STMicroel
 
 ### Gyroscope:
 
-> L3G4200D, LSM330D, LSM330DL, L3GD20, L3G4IS, LSM330, LSM330DLC
+> L3G4200D, LSM330D, LSM330DL, L3GD20, L3GD20H, L3G4IS, LSM330, LSM330DLC
 
 ### Magnetometer:
 
