@@ -68,12 +68,14 @@ static int st_lps22hb_i2c_remove(struct i2c_client *client)
 
 static const struct i2c_device_id st_lps22hb_ids[] = {
 	{ "lps22hb" },
+	{ "lps22hd" },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, st_lps22hb_ids);
 
 static const struct of_device_id st_lps22hb_id_table[] = {
 	{ .compatible = "st,lps22hb" },
+	{ .compatible = "st,lps22hd" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, st_lps22hb_id_table);
