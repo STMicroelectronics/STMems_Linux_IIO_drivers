@@ -70,6 +70,18 @@ config IIO_ST_ACC33_SPI
 	tristate
 	depends on IIO_ST_ACC33
 
+config IIO_ST_LIS3DHH
+	tristate "STMicroelectronics LIS3DHH Accelerometer driver"
+	depends on SPI_MASTER && SYSFS
+	select IIO_BUFFER
+	select IIO_KFIFO_BUF
+	help
+	  Say yes here to build support for STMicroelectronics LIS3DHH
+	  accelerometer
+
+	  This driver can also be built as a module. If so, will be named
+	  st_lis3dhh
+
 config IIO_ST_ACCEL_3AXIS
 	tristate "STMicroelectronics accelerometers 3-Axis Driver"
 	depends on (I2C || SPI_MASTER) && SYSFS
