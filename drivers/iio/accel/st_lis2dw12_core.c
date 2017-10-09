@@ -92,14 +92,13 @@ struct st_lis2dw12_std_entry {
 };
 
 struct st_lis2dw12_std_entry st_lis2dw12_std_table[] = {
-	{   12, 12 },
-	{   25, 18 },
-	{   50, 24 },
-	{  100, 24 },
-	{  200, 32 },
-	{  400, 48 },
-	{  800, 64 },
-	{ 1600, 64 },
+	{   12,  12 },
+	{   25,  18 },
+	{   50,  24 },
+	{  100,  24 },
+	{  200,  32 },
+	{  400,  48 },
+	{  800, 128 },
 };
 
 struct st_lis2dw12_odr {
@@ -116,7 +115,6 @@ static const struct st_lis2dw12_odr st_lis2dw12_odr_table[] = {
 	{  200, 0x6 }, /* LP 200Hz*/
 	{  400, 0x7 }, /* HP 400Hz*/
 	{  800, 0x8 }, /* HP 800Hz*/
-	{ 1600, 0x9 }, /* HP 1600Hz*/
 };
 
 struct st_lis2dw12_fs {
