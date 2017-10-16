@@ -716,6 +716,40 @@ static bool lsm6dsm_calculate_fifo_decimators(struct lsm6dsm_data *cdata,
 	return true;
 }
 
+static int st_lsm6dsm_of_get_drdy_pin(struct lsm6dsm_data *cdata,
+				      int *drdy_pin)
+{
+	struct device_node *np = cdata->dev->of_node;
+
+	if (!np)
+		return -EINVAL;
+
+	return of_property_read_u32(np, "st,drdy-int-pin", drdy_pin);
+}
+
+static int st_lsm6dsm_get_drdy_reg(struct lsm6dsm_data *cdata, u8 *drdy_reg)
+{
+	int err = 0, drdy_pin;
+
+	if (st_lsm6dsm_of_get_drdy_pin(cdata, &drdy_pin) < 0)
+		drdy_pin = 1;
+
+	switch (drdy_pin) {
+	case 1:
+		*drdy_reg = ST_LSM6DSM_INT1_ADDR;
+		break;
+	case 2:
+		*drdy_reg = ST_LSM6DSM_INT2_ADDR;
+		break;
+	default:
+		dev_err(cdata->dev, "unsupported data ready pin\n");
+		err = -EINVAL;
+		break;
+	}
+
+	return err;
+}
+
 int st_lsm6dsm_set_drdy_irq(struct lsm6dsm_sensor_data *sdata, bool state)
 {
 	int err;
@@ -735,7 +769,7 @@ int st_lsm6dsm_set_drdy_irq(struct lsm6dsm_sensor_data *sdata, bool state)
 
 	switch (sdata->sindex) {
 	case ST_MASK_ID_ACCEL:
-		reg_addr = ST_LSM6DSM_INT1_ADDR;
+		reg_addr = sdata->cdata->drdy_reg;
 
 		if (sdata->cdata->hwfifo_enabled[ST_MASK_ID_ACCEL]) {
 			if (tmp_irq_enable_fifo_mask == 0)
@@ -751,7 +785,7 @@ int st_lsm6dsm_set_drdy_irq(struct lsm6dsm_sensor_data *sdata, bool state)
 
 		break;
 	case ST_MASK_ID_GYRO:
-		reg_addr = ST_LSM6DSM_INT1_ADDR;
+		reg_addr = sdata->cdata->drdy_reg;
 
 		if (sdata->cdata->hwfifo_enabled[ST_MASK_ID_GYRO]) {
 			if (tmp_irq_enable_fifo_mask == 0)
@@ -780,7 +814,7 @@ int st_lsm6dsm_set_drdy_irq(struct lsm6dsm_sensor_data *sdata, bool state)
 		break;
 #ifdef CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT
 	case ST_MASK_ID_EXT0:
-		reg_addr = ST_LSM6DSM_INT1_ADDR;
+		reg_addr = sdata->cdata->drdy_reg;
 
 		if (sdata->cdata->hwfifo_enabled[ST_MASK_ID_EXT0]) {
 			if (tmp_irq_enable_fifo_mask == 0)
@@ -1898,7 +1932,7 @@ static int st_lsm6dsm_init_sensor(struct lsm6dsm_data *cdata)
 	if (err < 0)
 		return err;
 
-	return 0;
+	return st_lsm6dsm_get_drdy_reg(cdata, &cdata->drdy_reg);
 }
 
 static int st_lsm6dsm_set_selftest(struct lsm6dsm_sensor_data *sdata, int index)
@@ -2845,7 +2879,6 @@ int st_lsm6dsm_common_probe(struct lsm6dsm_data *cdata, int irq)
 
 	if (irq > 0) {
 		cdata->irq = irq;
-		dev_info(cdata->dev, "driver use DRDY int pin 1.\n");
 	} else {
 		err = -EINVAL;
 		dev_info(cdata->dev,
