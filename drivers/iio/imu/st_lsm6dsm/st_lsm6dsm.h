@@ -216,6 +216,7 @@ struct lsm6dsm_data {
 	int8_t gyro_selftest_status;
 	int8_t accel_selftest_status;
 
+	u8 drdy_reg;
 	int irq;
 
 	s64 timestamp;
