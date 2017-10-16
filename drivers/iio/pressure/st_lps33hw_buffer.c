@@ -103,27 +103,31 @@ ssize_t st_lps33hw_sysfs_set_hwfifo_watermark(struct device * dev,
 static int st_lps33hw_read_fifo(struct st_lps33hw_hw *hw)
 {
 	u8 iio_buff[ALIGN(sizeof(u32) + sizeof(s64), sizeof(s64))];
-	u8 status, buff[ST_LPS33HW_FIFO_SAMPLE_LEN];
-	int err, i, fifo_depth;
+	u8 status, buff[ST_LPS33HW_RX_MAX_LENGTH];
+	int err, i, read_len;
 
 	err = hw->tf->read(hw->dev, ST_LPS33HW_FIFO_SRC_ADDR,
 			   sizeof(status), &status);
 	if (err < 0)
 		return err;
 
-	fifo_depth = (status & ST_LPS33HW_FIFO_SRC_DIFF_MASK);
-	for (i = 0; i < fifo_depth; i++) {
-		err = hw->tf->read(hw->dev, ST_LPS33HW_PRESS_OUT_XL_ADDR,
-				   sizeof(buff), buff);
-		if (err < 0)
-			return err;
-		/* press sample */
-		memcpy(iio_buff, buff, ST_LPS33HW_PRESS_SAMPLE_LEN);
+	read_len = (status & ST_LPS33HW_FIFO_SRC_DIFF_MASK) *
+		   ST_LPS33HW_FIFO_SAMPLE_LEN;
+	if (!read_len)
+		return 0;
+
+	err = hw->tf->read(hw->dev, ST_LPS33HW_PRESS_OUT_XL_ADDR,
+			   read_len, buff);
+	if (err < 0)
+		return err;
+
+	for (i = 0; i < read_len; i += ST_LPS33HW_FIFO_SAMPLE_LEN) {
+		memcpy(iio_buff, buff + i, ST_LPS33HW_PRESS_SAMPLE_LEN);
 		iio_push_to_buffers_with_timestamp(
 				hw->iio_devs[ST_LPS33HW_PRESS],
 				iio_buff, hw->ts);
 		/* temp sample */
-		memcpy(iio_buff, buff + ST_LPS33HW_PRESS_SAMPLE_LEN,
+		memcpy(iio_buff, buff + i + ST_LPS33HW_PRESS_SAMPLE_LEN,
 		       ST_LPS33HW_TEMP_SAMPLE_LEN);
 		iio_push_to_buffers_with_timestamp(
 				hw->iio_devs[ST_LPS33HW_TEMP],
@@ -131,7 +135,7 @@ static int st_lps33hw_read_fifo(struct st_lps33hw_hw *hw)
 		hw->ts += hw->delta_ts;
 	}
 
-	return fifo_depth;
+	return read_len;
 }
 
 ssize_t st_lps33hw_sysfs_flush_fifo(struct device *dev,
