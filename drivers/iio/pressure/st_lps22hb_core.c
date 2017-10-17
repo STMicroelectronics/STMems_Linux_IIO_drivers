@@ -263,7 +263,7 @@ st_lps22hb_sysfs_get_hwfifo_watermark_max(struct device *dev,
 					  struct device_attribute *attr,
 					  char *buf)
 {
-	return sprintf(buf, "%d\n", ST_LPS22HB_MAX_FIFO_LENGTH - 1);
+	return sprintf(buf, "%d\n", ST_LPS22HB_MAX_FIFO_LENGTH);
 }
 
 static int st_lps22hb_read_raw(struct iio_dev *indio_dev,
