@@ -667,6 +667,12 @@ static bool lsm6dsm_calculate_fifo_decimators(struct lsm6dsm_data *cdata,
 		} else if ((accel_decimator > 8) && (accel_decimator < 16)) {
 			new_fifo_decimator[ST_MASK_ID_ACCEL] = accel_decimator - 7;
 			accel_decimator = 8;
+		} else if (accel_decimator > 16 && accel_decimator < 32) {
+			new_fifo_decimator[ST_MASK_ID_ACCEL] = accel_decimator - 15;
+			accel_decimator = 16;
+		} else if (accel_decimator > 32) {
+			new_fifo_decimator[ST_MASK_ID_ACCEL] = accel_decimator / 32;
+			accel_decimator = 32;
 		}
 		if ((gyro_decimator > 4) && (gyro_decimator < 8)) {
 			new_fifo_decimator[ST_MASK_ID_GYRO] = gyro_decimator - 3;
@@ -674,6 +680,12 @@ static bool lsm6dsm_calculate_fifo_decimators(struct lsm6dsm_data *cdata,
 		} else if ((gyro_decimator > 8) && (gyro_decimator < 16)) {
 			new_fifo_decimator[ST_MASK_ID_GYRO] = gyro_decimator - 7;
 			gyro_decimator = 8;
+		} else if (gyro_decimator > 16 && gyro_decimator < 32) {
+			new_fifo_decimator[ST_MASK_ID_GYRO] = gyro_decimator - 15;
+			gyro_decimator = 16;
+		} else if (gyro_decimator > 32) {
+			new_fifo_decimator[ST_MASK_ID_GYRO] = gyro_decimator / 32;
+			gyro_decimator = 32;
 		}
 #ifdef CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT
 		if ((ext_decimator > 4) && (ext_decimator < 8)) {
@@ -682,6 +694,12 @@ static bool lsm6dsm_calculate_fifo_decimators(struct lsm6dsm_data *cdata,
 		} else if ((ext_decimator > 8) && (ext_decimator < 16)) {
 			new_fifo_decimator[ST_MASK_ID_EXT0] = ext_decimator - 7;
 			ext_decimator = 8;
+		} else if (ext_decimator > 16 && ext_decimator < 32) {
+			new_fifo_decimator[ST_MASK_ID_EXT0] = ext_decimator - 15;
+			ext_decimator = 16;
+		} else if (ext_decimator > 32) {
+			new_fifo_decimator[ST_MASK_ID_EXT0] = ext_decimator / 32;
+			ext_decimator = 32;
 		}
 #endif /* CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT */
 		max_decimator = MAX(MAX(accel_decimator, gyro_decimator), ext_decimator);
