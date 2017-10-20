@@ -263,7 +263,6 @@ struct lsm6dsm_sensor_data {
 	u8 num_data_channels;
 	u8 sindex;
 	u8 data_out_reg;
-	u8 *buffer_data;
 };
 
 int st_lsm6dsm_write_data_with_mask(struct lsm6dsm_data *cdata,
