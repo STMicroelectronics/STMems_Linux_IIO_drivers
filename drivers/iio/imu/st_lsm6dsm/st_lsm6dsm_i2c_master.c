@@ -1411,10 +1411,6 @@ static int st_lsm6dsm_i2c_master_buffer_postenable(struct iio_dev *indio_dev)
 	if (err < 0)
 		return err;
 
-	sdata->buffer_data = kmalloc(indio_dev->scan_bytes, GFP_KERNEL);
-	if (!sdata->buffer_data)
-		return -ENOMEM;
-
 	mutex_lock(&sdata->cdata->odr_lock);
 
 	err = st_lsm6dsm_i2c_master_set_enable(sdata, true, true);
@@ -1443,8 +1439,6 @@ static int st_lsm6dsm_i2c_master_buffer_postdisable(struct iio_dev *indio_dev)
 	err = st_lsm6dsm_i2c_master_set_enable(sdata, false, true);
 
 	mutex_unlock(&sdata->cdata->odr_lock);
-
-	kfree(sdata->buffer_data);
 
 	return err < 0 ? err : 0;
 }
