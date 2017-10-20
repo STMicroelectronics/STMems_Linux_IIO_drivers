@@ -36,11 +36,11 @@
 int st_lsm6dsm_push_data_with_timestamp(struct lsm6dsm_data *cdata,
 					u8 index, u8 *data, int64_t timestamp)
 {
-	size_t offset;
 	int i, n = 0;
 	struct iio_chan_spec const *chs = cdata->indio_dev[index]->channels;
 	uint16_t bfch, bfchs_out = 0, bfchs_in = 0;
 	struct lsm6dsm_sensor_data *sdata = iio_priv(cdata->indio_dev[index]);
+	u8 buff[ALIGN(ST_LSM6DSM_FIFO_ELEMENT_LEN_BYTE, sizeof(s64)) + sizeof(s64)];
 
 	if (timestamp <= cdata->fifo_output[index].timestamp_p)
 		return -EINVAL;
@@ -49,8 +49,7 @@ int st_lsm6dsm_push_data_with_timestamp(struct lsm6dsm_data *cdata,
 		bfch = chs[i].scan_type.storagebits >> 3;
 
 		if (test_bit(i, cdata->indio_dev[index]->active_scan_mask)) {
-			memcpy(&sdata->buffer_data[bfchs_out],
-						&data[bfchs_in], bfch);
+			memcpy(&buff[bfchs_out], &data[bfchs_in], bfch);
 			n++;
 			bfchs_out += bfch;
 		}
@@ -58,12 +57,8 @@ int st_lsm6dsm_push_data_with_timestamp(struct lsm6dsm_data *cdata,
 		bfchs_in += bfch;
 	}
 
-	if (cdata->indio_dev[index]->scan_timestamp) {
-		offset = cdata->indio_dev[index]->scan_bytes / sizeof(s64) - 1;
-		((s64 *)sdata->buffer_data)[offset] = timestamp;
-	}
-
-	iio_push_to_buffers(cdata->indio_dev[index], sdata->buffer_data);
+	iio_push_to_buffers_with_timestamp(cdata->indio_dev[index],
+					   buff, timestamp);
 
 	cdata->fifo_output[index].timestamp_p = timestamp;
 
@@ -443,6 +438,7 @@ static irqreturn_t st_lsm6dsm_step_counter_trigger_handler(int irq, void *p)
 	struct iio_poll_func *pf = p;
 	struct iio_dev *indio_dev = pf->indio_dev;
 	struct lsm6dsm_sensor_data *sdata = iio_priv(indio_dev);
+	u8 buff[ALIGN(ST_LSM6DSM_FIFO_ELEMENT_LEN_BYTE, sizeof(s64)) + sizeof(s64)];
 
 	if (!sdata->cdata->reset_steps) {
 		err = sdata->cdata->tf->read(sdata->cdata,
@@ -462,14 +458,8 @@ static irqreturn_t st_lsm6dsm_step_counter_trigger_handler(int irq, void *p)
 		sdata->cdata->reset_steps = false;
 	}
 
-	memcpy(sdata->buffer_data, (u8 *)&sdata->cdata->num_steps, sizeof(u64));
-
-	if (indio_dev->scan_timestamp)
-		*(s64 *)((u8 *)sdata->buffer_data +
-				ALIGN(ST_LSM6DSM_BYTE_FOR_CHANNEL,
-						sizeof(s64))) = timestamp;
-
-	iio_push_to_buffers(indio_dev, sdata->buffer_data);
+	memcpy(buff, (u8 *)&sdata->cdata->num_steps, sizeof(u64));
+	iio_push_to_buffers_with_timestamp(indio_dev, buff, timestamp);
 
 st_lsm6dsm_step_counter_done:
 	iio_trigger_notify_done(indio_dev->trig);
@@ -521,10 +511,6 @@ static int st_lsm6dsm_buffer_postenable(struct iio_dev *indio_dev)
 	if (err < 0)
 		return err;
 
-	sdata->buffer_data = kmalloc(indio_dev->scan_bytes, GFP_KERNEL);
-	if (!sdata->buffer_data)
-		return -ENOMEM;
-
 	mutex_lock(&sdata->cdata->odr_lock);
 
 	err = st_lsm6dsm_set_enable(sdata, true, true);
@@ -556,8 +542,6 @@ static int st_lsm6dsm_buffer_postdisable(struct iio_dev *indio_dev)
 	err = st_lsm6dsm_set_enable(sdata, false, true);
 
 	mutex_unlock(&sdata->cdata->odr_lock);
-
-	kfree(sdata->buffer_data);
 
 	return err < 0 ? err : 0;
 }
