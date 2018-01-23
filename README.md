@@ -12,7 +12,7 @@ This repository contains Linux kernel (v3.10, v3.14, v3.18, v4.4) with STMicroel
 
 ### Inertial Module Unit (IMU):
 
-> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1
+> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1, ISM330DLC
 
 ### Accelerometer:
 
