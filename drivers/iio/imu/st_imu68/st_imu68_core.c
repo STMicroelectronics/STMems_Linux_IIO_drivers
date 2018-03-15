@@ -50,7 +50,7 @@
 #define ST_IMU68_ACC_FS_8G_GAIN			IIO_G_TO_M_S_2(244)
 #define ST_IMU68_ACC_FS_16G_GAIN		IIO_G_TO_M_S_2(732)
 
-#define ST_IMU68_GYRO_FS_245_GAIN		IIO_DEGREE_TO_RAD(8750)
+#define ST_IMU68_GYRO_FS_250_GAIN		IIO_DEGREE_TO_RAD(8750)
 #define ST_IMU68_GYRO_FS_500_GAIN		IIO_DEGREE_TO_RAD(17500)
 #define ST_IMU68_GYRO_FS_2000_GAIN		IIO_DEGREE_TO_RAD(70000)
 
@@ -118,7 +118,7 @@ static const struct st_imu68_fs_table_entry st_imu68_fs_table[] = {
 			.addr = ST_IMU68_REG_GYRO_FS_ADDR,
 			.mask = ST_IMU68_REG_GYRO_FS_MASK,
 		},
-		.fs_avl[0] = {  ST_IMU68_GYRO_FS_245_GAIN, 0x0 },
+		.fs_avl[0] = {  ST_IMU68_GYRO_FS_250_GAIN, 0x0 },
 		.fs_avl[1] = {  ST_IMU68_GYRO_FS_500_GAIN, 0x1 },
 		.fs_avl[2] = { ST_IMU68_GYRO_FS_2000_GAIN, 0x3 },
 	}
