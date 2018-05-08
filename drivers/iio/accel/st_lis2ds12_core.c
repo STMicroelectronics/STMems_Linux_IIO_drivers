@@ -27,7 +27,6 @@
 
 #include "st_lis2ds12.h"
 
-
 #define LIS2DS12_FS_LIST_NUM			4
 enum {
 	LIS2DS12_LP_MODE = 0,

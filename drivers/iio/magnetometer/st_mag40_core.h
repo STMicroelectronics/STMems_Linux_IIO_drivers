@@ -21,6 +21,7 @@
 #define LIS2MDL_DEV_NAME			"lis2mdl_magn"
 #define LSM303AH_DEV_NAME			"lsm303ah_magn"
 #define LSM303AGR_DEV_NAME			"lsm303agr_magn"
+#define ISM303DAC_DEV_NAME			"ism303dac_magn"
 
 /* Power Modes */
 enum {
