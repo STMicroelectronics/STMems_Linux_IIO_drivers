@@ -92,6 +92,10 @@ static const struct of_device_id st_acc33_i2c_of_match[] = {
 		.compatible = "st,lsm303agr_accel",
 		.data = LSM303AGR_DEV_NAME,
 	},
+	{
+		.compatible = "st,iis2dh_accel",
+		.data = IIS2DH_DEV_NAME,
+	},
 	{},
 };
 MODULE_DEVICE_TABLE(of, st_acc33_i2c_of_match);
@@ -101,6 +105,7 @@ static const struct i2c_device_id st_acc33_i2c_id_table[] = {
 	{ LIS2DH12_DEV_NAME },
 	{ LIS3DH_DEV_NAME },
 	{ LSM303AGR_DEV_NAME },
+	{ IIS2DH_DEV_NAME },
 	{},
 };
 MODULE_DEVICE_TABLE(i2c, st_acc33_i2c_id_table);

@@ -121,6 +121,9 @@ static const struct dev_pm_ops st_mag40_i2c_pm_ops = {
 static const struct i2c_device_id st_mag40_ids[] = {
 	{ LSM303AH_DEV_NAME, 0 },
 	{ LSM303AGR_DEV_NAME, 0 },
+	{ LIS2MDL_DEV_NAME, 0 },
+	{ ISM303DAC_DEV_NAME, 0 },
+	{ IIS2MDC_DEV_NAME, 0 },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, st_mag40_ids);
@@ -138,6 +141,14 @@ static const struct of_device_id st_mag40_id_table[] = {
 	{
 		.compatible = "st,lis2mdl_magn",
 		.data = LSM303AGR_DEV_NAME,
+	},
+	{
+		.compatible = "st,ism303dac_magn",
+		.data = ISM303DAC_DEV_NAME,
+	},
+	{
+		.compatible = "st,iis2mdc_magn",
+		.data = IIS2MDC_DEV_NAME,
 	},
 	{},
 };
