@@ -24,6 +24,7 @@
 #include "st_lis3dhh.h"
 
 #define LIS3DHH_DEV_NAME		"lis3dhh"
+#define IIS3DHHC_DEV_NAME		"iis3dhhc"
 
 #define REG_WHOAMI_ADDR			0x0f
 #define REG_WHOAMI_VAL			0x11
@@ -415,12 +416,17 @@ static const struct of_device_id st_lis3dhh_spi_of_match[] = {
 		.compatible = "st,lis3dhh",
 		.data = LIS3DHH_DEV_NAME,
 	},
+	{
+		.compatible = "st,iis3dhhc",
+		.data = IIS3DHHC_DEV_NAME,
+	},
 	{},
 };
 MODULE_DEVICE_TABLE(of, st_lis3dhh_spi_of_match);
 
 static const struct spi_device_id st_lis3dhh_spi_id_table[] = {
 	{ LIS3DHH_DEV_NAME },
+	{ IIS3DHHC_DEV_NAME },
 	{},
 };
 MODULE_DEVICE_TABLE(spi, st_lis3dhh_spi_id_table);

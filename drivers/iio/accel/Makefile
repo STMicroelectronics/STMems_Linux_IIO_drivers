@@ -27,6 +27,12 @@ obj-$(CONFIG_IIO_ST_LIS2HH12) += lis2hh12.o
 obj-$(CONFIG_IIO_ST_LIS2HH12_I2C) += st_lis2hh12_i2c.o
 obj-$(CONFIG_IIO_ST_LIS2HH12_SPI) += st_lis2hh12_spi.o
 
+ism303dac_accel-y += st_ism303dac_accel_core.o st_ism303dac_accel_buffer.o st_ism303dac_accel_trigger.o
+
+obj-$(CONFIG_IIO_ST_ISM303DAC_ACCEL) += ism303dac_accel.o
+obj-$(CONFIG_IIO_ST_ISM303DAC_ACCEL_I2C) += st_ism303dac_accel_i2c.o
+obj-$(CONFIG_IIO_ST_ISM303DAC_ACCEL_SPI) += st_ism303dac_accel_spi.o
+
 lis2hh12-y += st_lis2hh12_core.o st_lis2hh12_buffer.o st_lis2hh12_trigger.o
 
 st_acc33-y := st_acc33_core.o st_acc33_buffer.o
