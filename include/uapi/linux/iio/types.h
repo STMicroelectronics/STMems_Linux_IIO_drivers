@@ -40,6 +40,15 @@ enum iio_chan_type {
 	IIO_PH,
 	IIO_UVINDEX,
 	IIO_ELECTRICALCONDUCTIVITY,
+	IIO_SIGN_MOTION,
+	IIO_STEP_DETECTOR,
+	IIO_STEP_COUNTER,
+	IIO_TILT,
+	IIO_TAP,
+	IIO_TAP_TAP,
+	IIO_WRIST_TILT_GESTURE,
+	IIO_GESTURE,
+	IIO_GRAVITY,
 };
 
 enum iio_modifier {
@@ -89,6 +98,7 @@ enum iio_event_type {
 	IIO_EV_TYPE_THRESH_ADAPTIVE,
 	IIO_EV_TYPE_MAG_ADAPTIVE,
 	IIO_EV_TYPE_CHANGE,
+	IIO_EV_TYPE_FIFO_FLUSH,
 };
 
 enum iio_event_direction {
@@ -96,6 +106,8 @@ enum iio_event_direction {
 	IIO_EV_DIR_RISING,
 	IIO_EV_DIR_FALLING,
 	IIO_EV_DIR_NONE,
+	IIO_EV_DIR_FIFO_EMPTY,
+	IIO_EV_DIR_FIFO_DATA,
 };
 
 #endif /* _UAPI_IIO_TYPES_H_ */
