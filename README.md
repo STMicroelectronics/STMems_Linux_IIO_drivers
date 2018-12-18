@@ -8,7 +8,7 @@ Index
 
 Introduction
 ==============
-This repository contains Linux kernel (v3.10, v3.14, v3.18, v4.4, v4.9) with STMicroelectronics MEMS sensor support. STM sensor drivers are located under the directory [drivers/iio](https://github.com/STMicroelectronics/STMems_Linux_IIO_drivers/tree/linux-4.4.y-gh/drivers/iio)  organized by sensor type:
+This repository contains Linux kernel v4.9 with STMicroelectronics MEMS sensor support. STM sensor drivers are located under the directory [drivers/iio](https://github.com/STMicroelectronics/STMems_Linux_IIO_drivers/tree/linux-4.9.y-gh/drivers/iio)  organized by sensor type:
 
 ### Inertial Module Unit (IMU):
 
