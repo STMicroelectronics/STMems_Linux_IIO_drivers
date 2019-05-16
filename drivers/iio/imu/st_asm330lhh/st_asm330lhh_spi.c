@@ -50,7 +50,7 @@ static int st_asm330lhh_spi_read(struct device *dev, u8 addr, int len,
 }
 
 static int st_asm330lhh_spi_write(struct device *dev, u8 addr, int len,
-				u8 *data)
+				const u8 *data)
 {
 	struct st_asm330lhh_hw *hw;
 	struct spi_device *spi;
