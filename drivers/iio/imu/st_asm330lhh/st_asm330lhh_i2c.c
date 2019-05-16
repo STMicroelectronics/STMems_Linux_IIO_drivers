@@ -1,7 +1,7 @@
 /*
  * STMicroelectronics st_asm330lhh i2c driver
  *
- * Copyright 2017 STMicroelectronics Inc.
+ * Copyright 2018 STMicroelectronics Inc.
  *
  * Lorenzo Bianconi <lorenzo.bianconi@st.com>
  *
@@ -22,7 +22,7 @@ static int st_asm330lhh_i2c_read(struct device *dev, u8 addr, int len, u8 *data)
 					     len, data);
 }
 
-static int st_asm330lhh_i2c_write(struct device *dev, u8 addr, int len, u8 *data)
+static int st_asm330lhh_i2c_write(struct device *dev, u8 addr, int len, const u8 *data)
 {
 	return i2c_smbus_write_i2c_block_data(to_i2c_client(dev), addr,
 					      len, data);

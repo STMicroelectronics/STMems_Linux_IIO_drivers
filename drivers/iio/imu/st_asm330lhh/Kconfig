@@ -21,3 +21,8 @@ config IIO_ST_ASM330LHH_SPI
 	tristate
 	depends on IIO_ST_ASM330LHH
 
+config IIO_ST_ASM330LHH_EN_TEMPERATURE
+	boolean "Enable internal temperature sensor"
+	depends on IIO_ST_ASM330LHH
+	help
+	  Enable internal temperature sensor channel
