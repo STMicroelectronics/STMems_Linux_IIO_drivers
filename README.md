@@ -59,9 +59,8 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 
 >         obj-y += lsm6dsm/
 
-> * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 4.4):
+> * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 4.9):
 
- enum iio_modifier {
 >         @@ -89,6 +98,7 @@ enum iio_event_type {
 >                 IIO_EV_TYPE_THRESH_ADAPTIVE,
 >                 IIO_EV_TYPE_MAG_ADAPTIVE,
@@ -69,8 +68,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >         +       IIO_EV_TYPE_FIFO_FLUSH,
 >         };
 
->          enum iio_event_direction {
->          @@ -96,6 +106,8 @@ enum iio_event_direction {
+>         @@ -96,6 +106,8 @@ enum iio_event_direction {
 >                 IIO_EV_DIR_RISING,
 >                 IIO_EV_DIR_FALLING,
 >                 IIO_EV_DIR_NONE,
@@ -78,9 +76,9 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >         +       IIO_EV_DIR_FIFO_DATA,
 >         };
 
-> * Add custom channel types *include/uapi/linux/iio/types.h* depending on the custom sensor implemented into driver (follow a sample patch for kernel 4.4):
+> * Add custom channel types *include/uapi/linux/iio/types.h* depending on the custom sensor implemented into driver (follow a sample patch for kernel 4.9):
 
->          @@ -40,6 +40,15 @@ enum iio_chan_type {
+>         @@ -40,6 +40,15 @@ enum iio_chan_type {
 >                 IIO_PH,
 >                 IIO_UVINDEX,
 >                 IIO_ELECTRICALCONDUCTIVITY,
