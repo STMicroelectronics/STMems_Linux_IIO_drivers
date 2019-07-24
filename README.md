@@ -61,22 +61,20 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 
 > * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 4.4):
 
->         enum iio_modifier {
 >         @@ -85,6 +93,7 @@ enum iio_event_type {
 >                   IIO_EV_TYPE_THRESH_ADAPTIVE,
 >                   IIO_EV_TYPE_MAG_ADAPTIVE,
 >                   IIO_EV_TYPE_CHANGE,
->           +       IIO_EV_TYPE_FIFO_FLUSH,
+>         +         IIO_EV_TYPE_FIFO_FLUSH,
 >         };
 >
->         enum iio_event_direction {
 >         @@ -92,6 +101,8 @@ enum iio_event_direction {
 >                   IIO_EV_DIR_RISING,
 >                   IIO_EV_DIR_FALLING,
 >                   IIO_EV_DIR_NONE,
 >         +         IIO_EV_DIR_FIFO_EMPTY,
 >         +         IIO_EV_DIR_FIFO_DATA,
->          };
+>         };
 
 > * Add custom channel types *include/uapi/linux/iio/types.h* depending on the custom sensor implemented into driver (follow a sample patch for kernel 4.4):
 
@@ -117,6 +115,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 > *- st,drdy-int-pin*: MEMS sensor interrupt line to use (default 1)
 
 #### Device Tree Integration Examples
+
 > I2C example (based on Raspberry PI 3):
 
 >		&i2c0 {
