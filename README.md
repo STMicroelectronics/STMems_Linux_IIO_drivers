@@ -61,7 +61,6 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 
 > * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 3.14):
 
->         enum iio_modifier {
 >         @@ -61,6 +69,7 @@ enum iio_event_type {
 >                 IIO_EV_TYPE_ROC,
 >                 IIO_EV_TYPE_THRESH_ADAPTIVE,
@@ -69,7 +68,6 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >         +       IIO_EV_TYPE_FIFO_FLUSH,
 >         };
 >
->         enum iio_event_info {
 >         @@ -73,6 +82,8 @@ enum iio_event_direction {
 >                 IIO_EV_DIR_EITHER,
 >                 IIO_EV_DIR_RISING,
