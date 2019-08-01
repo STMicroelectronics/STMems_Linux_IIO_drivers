@@ -8,11 +8,11 @@ Index
 
 Introduction
 ==============
-This repository contains Linux kernel v4.14 with STMicroelectronics MEMS sensor support. STM sensor drivers are located under the directory [drivers/iio](https://github.com/STMicroelectronics/STMems_Linux_IIO_drivers/tree/linux-4.14.y-gh/drivers/iio)  organized by sensor type:
+This repository contains Linux kernel v4.19 with STMicroelectronics MEMS sensor support. STM sensor drivers are located under the directory [drivers/iio](https://github.com/STMicroelectronics/STMems_Linux_IIO_drivers/tree/linux-4.19.y-gh/drivers/iio)  organized by sensor type:
 
 ### Inertial Module Unit (IMU):
 
-> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1, ISM330DLC, LSM6DSO, ASM330LHH
+> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1, ISM330DLC, LSM6DSO, ASM330LHH, LSM6DSR
 
 ### Accelerometer:
 
@@ -59,7 +59,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 
 >         obj-y += lsm6dsm/
 
-> * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 4.14):
+> * Add custom events into *include/uapi/linux/iio/types.h* (follow a sample patch for kernel 4.19):
 
 >         @@ -89,6 +98,7 @@ enum iio_event_type {
 >                 IIO_EV_TYPE_THRESH_ADAPTIVE,
@@ -76,7 +76,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >         +       IIO_EV_DIR_FIFO_DATA,
 >         };
 
-> * Add custom channel types *include/uapi/linux/iio/types.h* depending on the custom sensor implemented into driver (follow a sample patch for kernel 4.14):
+> * Add custom channel types *include/uapi/linux/iio/types.h* depending on the custom sensor implemented into driver (follow a sample patch for kernel 4.19):
 
 >          @@ -43,6 +43,14 @@ enum iio_chan_type {
 >                  IIO_ELECTRICALCONDUCTIVITY,
@@ -127,7 +127,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >				compatible = "st,lsm6dsm";
 >				reg = <0x6b>;
 >				interrupt-parent = <&gpio>;
->				interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+>				interrupts = <26 IRQ_TYPE_LEVEL_HIGH>;
 >		};
 
 > SPI example (based on Raspberry PI 3):
@@ -141,7 +141,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >				compatible = "st,lsm6dsm";
 >				reg = <0>;
 >				interrupt-parent = <&gpio>;
->				interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+>				interrupts = <26 IRQ_TYPE_LEVEL_HIGH>;
 >			};
 
 
