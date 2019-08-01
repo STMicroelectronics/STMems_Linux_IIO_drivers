@@ -12,7 +12,7 @@ This repository contains Linux kernel v4.4 with STMicroelectronics MEMS sensor s
 
 ### Inertial Module Unit (IMU):
 
-> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1, ISM330DLC, LSM6DSO, ASM330LHH
+> LSM6DS3, LSM6DS3H, LSM6DSL, LSM6DSM, LSM9DS0, LSM9DS1, ISM330DLC, LSM6DSO, ASM330LHH, LSM6DSR
 
 ### Accelerometer:
 
@@ -126,7 +126,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >				compatible = "st,lsm6dsm";
 >				reg = <0x6b>;
 >				interrupt-parent = <&gpio>;
->				interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+>				interrupts = <26 IRQ_TYPE_LEVEL_HIGH>;
 >		};
 
 > SPI example (based on Raspberry PI 3):
@@ -140,7 +140,7 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >				compatible = "st,lsm6dsm";
 >				reg = <0>;
 >				interrupt-parent = <&gpio>;
->				interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+>				interrupts = <26 IRQ_TYPE_LEVEL_HIGH>;
 >			};
 
 
