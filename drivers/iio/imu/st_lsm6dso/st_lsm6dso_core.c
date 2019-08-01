@@ -45,7 +45,7 @@
 #define ST_LSM6DSO_REG_OUTY_L_G_ADDR		0x24
 #define ST_LSM6DSO_REG_OUTZ_L_G_ADDR		0x26
 
-#define ST_LSM6DSO_REG_TAP_CFG0_ADDR			0x56
+#define ST_LSM6DSO_REG_TAP_CFG0_ADDR		0x56
 #define ST_LSM6DSO_REG_LIR_MASK			BIT(0)
 
 #define ST_LSM6DSO_REG_FIFO_CTRL3_ADDR		0x09
@@ -339,7 +339,7 @@ static int st_lsm6dso_get_odr_calibration(struct st_lsm6dso_hw *hw)
 	}
 
 	hw->odr_calib = (data * 15) / 10000;
-	dev_err(hw->dev, "ODR Calibration Factor %d\n", hw->odr_calib);
+	dev_info(hw->dev, "ODR Calibration Factor %d\n", hw->odr_calib);
 
 	return 0;
 }
@@ -1244,6 +1244,8 @@ int st_lsm6dso_probe(struct device *dev, int irq,
 	if (err)
 		return err;
 #endif /* CONFIG_PM && CONFIG_IIO_ST_LSM6DSO_MAY_WAKEUP */
+
+	dev_info(dev, "Device probed\n");
 
 	return 0;
 

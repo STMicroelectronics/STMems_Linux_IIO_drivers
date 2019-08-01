@@ -39,6 +39,23 @@ struct st_lsm6dso_ext_pwr {
 	u8 on_val;
 };
 
+/*
+ * struct st_lsm6dso_ext_dev_settings - ST IMU sensor HUB devices
+ * @i2c_addr: Device Address on I2C master interface (I2C only)
+ * @wai_addr: WHOAMI register address
+ * @wai_val: WHOAMI register value
+ * @odr_table: List of supported ODR values (please consider I2C master
+ *             support max 100 Hz)
+ * @fs_table: Sensor Full Scale table
+ * @temp_comp_reg: Temperature compensation register description (addr + mask)
+ * @pwr_table: Power management register description (addr + on/off value)
+ * @off_canc_reg: Offset Cancellation register description (addr + mask)
+ * @bdu_reg: BDU register description (addr + mask)
+ * @ext_available_scan_masks: IIO scan mask
+ * @ext_channels: IIO Channel Specification structure
+ * @ext_chan_depth: IIO Channel number
+ * @data_len: Output data size
+ */
 struct st_lsm6dso_ext_dev_settings {
 	u8 i2c_addr[2];
 	u8 wai_addr;
