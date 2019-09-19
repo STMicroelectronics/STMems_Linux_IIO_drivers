@@ -14,11 +14,14 @@
 #include <linux/device.h>
 #include <linux/iio/iio.h>
 
+#define ST_ASM330LHH_DEBUG_DISCHARGE
+
 #define ST_ASM330LHH_MAX_ODR 		833
 #define ST_ASM330LHH_ODR_LIST_SIZE	8
 
 #define ST_ASM330LHH_DEV_NAME		"asm330lhh"
 
+/* FIFO simple size and depth */
 #define ST_ASM330LHH_SAMPLE_SIZE	6
 #define ST_ASM330LHH_TS_SAMPLE_SIZE	4
 #define ST_ASM330LHH_TAG_SIZE		1
@@ -121,15 +124,7 @@ enum st_asm330lhh_sensor_id {
 #ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
 	ST_ASM330LHH_ID_TEMP,
 #endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
-	ST_ASM330LHH_ID_MAX,
-};
-
-static const enum st_asm330lhh_sensor_id st_asm330lhh_main_sensor_list[] = {
-	 [0] = ST_ASM330LHH_ID_GYRO,
-	 [1] = ST_ASM330LHH_ID_ACC,
-#ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
-	 [2] = ST_ASM330LHH_ID_TEMP,
-#endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
+	ST_ASM330LHH_ID_MAX
 };
 
 enum st_asm330lhh_fifo_mode {
@@ -162,13 +157,13 @@ struct st_asm330lhh_sensor {
 	u32 gain;
 	u16 odr;
 	u32 offset;
+#ifdef ST_ASM330LHH_DEBUG_DISCHARGE
+	u32 discharged_samples;
+#endif /* ST_ASM330LHH_DEBUG_DISCHARGE */
 
 #ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
 	__le16 old_data;
 #endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
-
-	u8 std_samples;
-	u8 std_level;
 
 	u16 max_watermark;
 	u16 watermark;
@@ -211,16 +206,13 @@ struct st_asm330lhh_hw {
 	u32 enable_mask;
 	u32 requested_mask;
 
-	s32 odr_calib;
-
 	/* Timestamp sample ODR */
 	u16 odr;
 
+	u64 ts_delta_ns;
 	s64 ts_offset;
 	s64 hw_ts;
-	s64 hw_ts_high;
 	s64 tsample;
-	s64 hw_ts_old;
 	s64 delta_ts;
 	s64 delta_hw_ts;
 	s64 ts;
@@ -302,4 +294,5 @@ int st_asm330lhh_set_fifo_mode(struct st_asm330lhh_hw *hw,
 			     enum st_asm330lhh_fifo_mode fifo_mode);
 int __st_asm330lhh_set_sensor_batching_odr(struct st_asm330lhh_sensor *sensor,
 					 bool enable);
+int st_asm330lhh_update_batching(struct iio_dev *iio_dev, bool enable);
 #endif /* ST_ASM330LHH_H */
