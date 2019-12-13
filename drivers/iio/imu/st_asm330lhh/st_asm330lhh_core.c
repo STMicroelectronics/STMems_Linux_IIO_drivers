@@ -259,7 +259,6 @@ static const struct st_asm330lhh_fs_table_entry st_asm330lhh_fs_table[] = {
 	[ST_ASM330LHH_ID_TEMP] = {
 		.size = ST_ASM330LHH_FS_TEMP_LIST_SIZE,
 		.fs_avl[0] = {
-			.reg = { 0 },
 			.gain = ST_ASM330LHH_TEMP_FS_GAIN,
 			.val = 0x0
 		},
