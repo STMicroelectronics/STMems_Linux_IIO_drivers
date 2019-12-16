@@ -14,6 +14,7 @@
 #include <linux/iio/iio.h>
 #include <linux/iio/sysfs.h>
 #include <linux/pm.h>
+#include <linux/interrupt.h>
 #include <linux/of.h>
 
 #include <linux/platform_data/st_sensors_pdata.h>
