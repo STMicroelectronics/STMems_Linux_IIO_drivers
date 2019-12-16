@@ -15,6 +15,7 @@
 #include <linux/iio/sysfs.h>
 #include <linux/iio/events.h>
 #include <linux/pm.h>
+#include <linux/interrupt.h>
 #include <linux/of.h>
 
 #include "st_asm330lhh.h"
