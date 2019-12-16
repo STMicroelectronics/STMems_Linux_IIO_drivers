@@ -305,6 +305,8 @@ static const struct iio_chan_spec st_asm330lhh_temp_channels[] = {
 			.endianness = IIO_LE,
 		}
 	},
+	ST_ASM330LHH_FLUSH_CHANNEL(IIO_TEMP, IIO_EV_TYPE_FIFO_FLUSH,
+				   IIO_EV_DIR_EITHER),
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
 #endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
