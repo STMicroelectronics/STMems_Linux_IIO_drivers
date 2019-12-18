@@ -101,7 +101,7 @@ static struct spi_driver st_asm330lhh_driver = {
 	.driver = {
 		.name = "st_asm330lhh_spi",
 		.pm = &st_asm330lhh_pm_ops,
-		.of_match_table = of_match_ptr(st_asm330lhh_spi_of_match),
+		.of_match_table = st_asm330lhh_spi_of_match,
 	},
 	.probe = st_asm330lhh_spi_probe,
 	.remove = st_asm330lhh_spi_remove,
