@@ -20,62 +20,6 @@
 
 #include "st_asm330lhh.h"
 
-#define ST_ASM330LHH_REG_FIFO_CTRL3_ADDR	0x09
-#define ST_ASM330LHH_REG_BDR_XL_MASK		0x0F
-#define ST_ASM330LHH_REG_BDR_GY_MASK		0xF0
-
-#define ST_ASM330LHH_REG_FIFO_CTRL4_ADDR	0x0a
-#define ST_ASM330LHH_REG_BDR_TEMP_MASK		0x30
-
-#define ST_ASM330LHH_REG_INT1_CTRL_ADDR		0x0d
-#define ST_ASM330LHH_REG_INT2_CTRL_ADDR		0x0e
-#define ST_ASM330LHH_REG_INT_FIFO_TH_MASK	BIT(3)
-
-#define ST_ASM330LHH_REG_WHOAMI_ADDR		0x0f
-#define ST_ASM330LHH_WHOAMI_VAL			0x6b
-#define ST_ASM330LHH_CTRL1_XL_ADDR		0x10
-#define ST_ASM330LHH_CTRL2_G_ADDR		0x11
-#define ST_ASM330LHH_REG_CTRL3_C_ADDR		0x12
-#define ST_ASM330LHH_REG_SW_RESET_MASK		BIT(0)
-#define ST_ASM330LHH_REG_BOOT_MASK		BIT(7)
-#define ST_ASM330LHH_REG_BDU_MASK		BIT(6)
-
-#define ST_ASM330LHH_REG_CTRL4_C_ADDR		0x13
-#define ST_ASM330LHH_REG_DRDY_MASK		BIT(3)
-
-#define ST_ASM330LHH_REG_CTRL5_C_ADDR		0x14
-#define ST_ASM330LHH_REG_ROUNDING_MASK		0x60
-
-#define ST_ASM330LHH_REG_CTRL10_C_ADDR		0x19
-#define ST_ASM330LHH_REG_TIMESTAMP_EN_MASK	BIT(5)
-
-#define ST_ASM330LHH_REG_STATUS_ADDR		0x1e
-#define ST_ASM330LHH_REG_STATUS_TDA		BIT(2)
-
-#define ST_ASM330LHH_REG_OUT_TEMP_L_ADDR	0x20
-#define ST_ASM330LHH_REG_OUT_TEMP_H_ADDR	0x21
-
-#define ST_ASM330LHH_REG_OUTX_L_A_ADDR		0x28
-#define ST_ASM330LHH_REG_OUTY_L_A_ADDR		0x2a
-#define ST_ASM330LHH_REG_OUTZ_L_A_ADDR		0x2c
-
-#define ST_ASM330LHH_REG_OUTX_L_G_ADDR		0x22
-#define ST_ASM330LHH_REG_OUTY_L_G_ADDR		0x24
-#define ST_ASM330LHH_REG_OUTZ_L_G_ADDR		0x26
-
-#define ST_ASM330LHH_REG_TAP_CFG0_ADDR		0x56
-#define ST_ASM330LHH_REG_LIR_MASK		BIT(0)
-
-#define ST_ASM330LHH_INTERNAL_FREQ_FINE		0x63
-
-/* Timestamp Tick 25us/LSB */
-#define ST_ASM330LHH_TS_DELTA_NS		25000ULL
-
-/* Temperature in uC */
-#define ST_ASM330LHH_TEMP_GAIN			256
-#define ST_ASM330LHH_TEMP_FS_GAIN		1000000 / ST_ASM330LHH_TEMP_GAIN
-#define ST_ASM330LHH_TEMP_OFFSET		6400
-
 static struct st_asm330lhh_suspend_resume_entry
 	st_asm330lhh_suspend_resume[ST_ASM330LHH_SUSPEND_RESUME_REGS] = {
 		[ST_ASM330LHH_CTRL1_XL_REG] = {
@@ -591,50 +535,20 @@ static int st_asm330lhh_read_oneshot(struct st_asm330lhh_sensor *sensor,
 	int err, delay;
 	__le16 data;
 
-#ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
-	if (sensor->id == ST_ASM330LHH_ID_TEMP) {
-		u8 status;
+	err = st_asm330lhh_sensor_set_enable(sensor, true);
+	if (err < 0)
+		return err;
 
-		mutex_lock(&sensor->hw->fifo_lock);
-		err = sensor->hw->tf->read(sensor->hw->dev,
-					   ST_ASM330LHH_REG_STATUS_ADDR,
-					   sizeof(status), &status);
-		if (err < 0)
-			goto unlock;
+	/* Use big delay for data valid because of drdy mask enabled */
+	delay = 10000000 / sensor->odr;
+	usleep_range(delay, 2 * delay);
 
-		if (status & ST_ASM330LHH_REG_STATUS_TDA) {
-			err = sensor->hw->tf->read(sensor->hw->dev,
-						   addr, sizeof(data),
-						   (u8 *)&data);
-			if (err < 0)
-				goto unlock;
+	err = st_asm330lhh_read_atomic(sensor->hw, addr, sizeof(data),
+				       (u8 *)&data);
+	if (err < 0)
+		return err;
 
-			sensor->old_data = data;
-		} else {
-			data = sensor->old_data;
-		}
-unlock:
-		mutex_unlock(&sensor->hw->fifo_lock);
-
-	} else {
-#endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
-		err = st_asm330lhh_sensor_set_enable(sensor, true);
-		if (err < 0)
-			return err;
-
-		/* Use big delay for data valid because of drdy mask enabled */
-		delay = 10000000 / sensor->odr;
-		usleep_range(delay, 2 * delay);
-
-		err = st_asm330lhh_read_atomic(sensor->hw, addr, sizeof(data),
-					       (u8 *)&data);
-		if (err < 0)
-			return err;
-
-		st_asm330lhh_sensor_set_enable(sensor, false);
-#ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
-	}
-#endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
+	err = st_asm330lhh_sensor_set_enable(sensor, false);
 
 	*val = (s16)le16_to_cpu(data);
 
