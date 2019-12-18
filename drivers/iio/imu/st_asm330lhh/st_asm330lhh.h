@@ -391,8 +391,6 @@ int st_asm330lhh_sensor_set_enable(struct st_asm330lhh_sensor *sensor,
 				 bool enable);
 int st_asm330lhh_buffers_setup(struct st_asm330lhh_hw *hw);
 int st_asm330lhh_deallocate_fifo(struct st_asm330lhh_hw *hw);
-int st_asm330lhh_get_odr_val(struct st_asm330lhh_sensor *sensor, int odr,
-			     int uodr, int *podr, int *puodr, u8 *val);
 int st_asm330lhh_get_batch_val(struct st_asm330lhh_sensor *sensor, int odr,
 			       int uodr, u8 *val);
 int st_asm330lhh_update_watermark(struct st_asm330lhh_sensor *sensor,
