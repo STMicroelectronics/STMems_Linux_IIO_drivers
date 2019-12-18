@@ -299,8 +299,8 @@ static const struct iio_chan_spec st_asm330lhh_gyro_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(3),
 };
 
-#ifdef CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE
-static const struct iio_chan_spec st_asm330lhh_temp_channels[] = {
+static
+__maybe_unused const struct iio_chan_spec st_asm330lhh_temp_channels[] = {
 	{
 		.type = IIO_TEMP,
 		.address = ST_ASM330LHH_REG_OUT_TEMP_L_ADDR,
@@ -319,7 +319,6 @@ static const struct iio_chan_spec st_asm330lhh_temp_channels[] = {
 	ST_ASM330LHH_EVENT_CHANNEL(IIO_TEMP, flush),
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
-#endif /* CONFIG_IIO_ST_ASM330LHH_EN_TEMPERATURE */
 
 int __st_asm330lhh_write_with_mask(struct st_asm330lhh_hw *hw, u8 addr, u8 mask,
 				 u8 val)
@@ -351,8 +350,7 @@ out:
 	return (err < 0) ? err : 0;
 }
 
-#ifdef CONFIG_DEBUG_FS
-static int st_asm330lhh_reg_access(struct iio_dev *iio_dev,
+static __maybe_unused int st_asm330lhh_reg_access(struct iio_dev *iio_dev,
 				 unsigned int reg, unsigned int writeval,
 				 unsigned int *readval)
 {
@@ -371,7 +369,6 @@ static int st_asm330lhh_reg_access(struct iio_dev *iio_dev,
 
 	return (ret < 0) ? ret : 0;
 }
-#endif /* CONFIG_DEBUG_FS */
 
 static int st_asm330lhh_check_whoami(struct st_asm330lhh_hw *hw)
 {
@@ -807,8 +804,8 @@ static IIO_DEVICE_ATTR(in_temp_scale_available, 0444,
 static IIO_DEVICE_ATTR(hwfifo_flush, 0200, NULL, st_asm330lhh_flush_fifo, 0);
 static IIO_DEVICE_ATTR(hwfifo_watermark, 0644, st_asm330lhh_get_watermark,
 		       st_asm330lhh_set_watermark, 0);
-#ifdef ST_ASM330LHH_DEBUG_DISCHARGE
-ssize_t st_asm330lhh_get_discharded_samples(struct device *dev,
+static
+ssize_t __maybe_unused st_asm330lhh_get_discharded_samples(struct device *dev,
 				     struct device_attribute *attr, char *buf)
 {
 	struct iio_dev *iio_dev = dev_get_drvdata(dev);
@@ -824,7 +821,6 @@ ssize_t st_asm330lhh_get_discharded_samples(struct device *dev,
 }
 static IIO_DEVICE_ATTR(discharded_samples, 0444,
 		       st_asm330lhh_get_discharded_samples, NULL, 0);
-#endif /* ST_ASM330LHH_DEBUG_DISCHARGE */
 
 static struct attribute *st_asm330lhh_acc_attributes[] = {
 	&iio_dev_attr_sampling_frequency_available.dev_attr.attr,
