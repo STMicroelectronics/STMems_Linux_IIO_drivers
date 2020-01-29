@@ -365,8 +365,8 @@ static int st_asm330lhh_set_full_scale(struct st_asm330lhh_sensor *sensor,
 	int i, err;
 	u8 val;
 
-	/* for temperature sensor the gain is fixed */
-	if (id == ST_ASM330LHH_ID_TEMP)
+	/* for other sensors gain is fixed */
+	if (id > ST_ASM330LHH_ID_ACC)
 		return 0;
 
 	for (i = 0; i < st_asm330lhh_fs_table[id].size; i++)
