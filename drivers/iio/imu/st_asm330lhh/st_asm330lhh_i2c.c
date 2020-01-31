@@ -64,6 +64,11 @@ static int st_asm330lhh_i2c_probe(struct i2c_client *client,
 				&st_asm330lhh_transfer_fn);
 }
 
+static int st_asm330lhh_i2c_remove(struct i2c_client *client)
+{
+	return st_asm330lhh_remove(&client->dev);
+}
+
 static const struct of_device_id st_asm330lhh_i2c_of_match[] = {
 	{
 		.compatible = "st,asm330lhh",
@@ -85,6 +90,7 @@ static struct i2c_driver st_asm330lhh_driver = {
 		.of_match_table = st_asm330lhh_i2c_of_match,
 	},
 	.probe = st_asm330lhh_i2c_probe,
+	.remove = st_asm330lhh_i2c_remove,
 	.id_table = st_asm330lhh_i2c_id_table,
 };
 module_i2c_driver(st_asm330lhh_driver);

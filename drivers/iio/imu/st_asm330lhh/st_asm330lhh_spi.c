@@ -78,6 +78,11 @@ static int st_asm330lhh_spi_probe(struct spi_device *spi)
 				&st_asm330lhh_transfer_fn);
 }
 
+static int st_asm330lhh_spi_remove(struct spi_device *spi)
+{
+	return st_asm330lhh_remove(&spi->dev);
+}
+
 static const struct of_device_id st_asm330lhh_spi_of_match[] = {
 	{
 		.compatible = "st,asm330lhh",
@@ -99,6 +104,7 @@ static struct spi_driver st_asm330lhh_driver = {
 		.of_match_table = st_asm330lhh_spi_of_match,
 	},
 	.probe = st_asm330lhh_spi_probe,
+	.remove = st_asm330lhh_spi_remove,
 	.id_table = st_asm330lhh_spi_id_table,
 };
 module_spi_driver(st_asm330lhh_driver);
