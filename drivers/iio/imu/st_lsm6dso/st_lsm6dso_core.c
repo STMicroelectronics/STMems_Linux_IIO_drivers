@@ -350,6 +350,7 @@ static int st_lsm6dso_get_odr_calibration(struct st_lsm6dso_hw *hw)
 {
 	int err;
 	s8 data;
+	s64 odr_calib;
 
 	err = hw->tf->read(hw->dev, ST_LSM6DSO_INTERNAL_FREQ_FINE, sizeof(data),
 			   (u8 *)&data);
@@ -359,8 +360,11 @@ static int st_lsm6dso_get_odr_calibration(struct st_lsm6dso_hw *hw)
 		return err;
 	}
 
-	hw->odr_calib = (data * 15) / 10000;
-	dev_info(hw->dev, "ODR Calibration Factor %d\n", hw->odr_calib);
+	odr_calib = (data * 37500) / 1000;
+	hw->ts_delta_ns = ST_LSM6DSO_TS_DELTA_NS - odr_calib;
+
+	dev_info(hw->dev, "Freq Fine %lld (ts %lld)\n",
+		 odr_calib, hw->ts_delta_ns);
 
 	return 0;
 }
