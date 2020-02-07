@@ -1,7 +1,7 @@
 /*
  * STMicroelectronics st_lsm6dso sensor driver
  *
- * Copyright 2017 STMicroelectronics Inc.
+ * Copyright 2020 STMicroelectronics Inc.
  *
  * Lorenzo Bianconi <lorenzo.bianconi@st.com>
  *
@@ -81,6 +81,12 @@ static struct st_lsm6dso_suspend_resume_entry
 		},
 	};
 
+/**
+ * List of supported ODR
+ *
+ * The following table is complete list of supported ODR by Acc, Gyro and Temp
+ * sensors. ODR value can be also decimal (i.e 12.5 Hz)
+ */
 static const struct st_lsm6dso_odr_table_entry st_lsm6dso_odr_table[] = {
 	[ST_LSM6DSO_ID_ACC] = {
 		.odr_size = 8,
@@ -119,6 +125,12 @@ static const struct st_lsm6dso_odr_table_entry st_lsm6dso_odr_table[] = {
 	},
 };
 
+/**
+ * List of supported Full Scale Value
+ *
+ * The following table is complete list of supported Full Scale by Acc, Gyro
+ * and Temp sensors.
+ */
 static const struct st_lsm6dso_fs_table_entry st_lsm6dso_fs_table[] = {
 	[ST_LSM6DSO_ID_ACC] = {
 		.size = ST_LSM6DSO_FS_ACC_LIST_SIZE,
@@ -200,6 +212,17 @@ static const struct st_lsm6dso_fs_table_entry st_lsm6dso_fs_table[] = {
 	},
 };
 
+/**
+ * Accelerometer IIO channels description
+ *
+ * Accelerometer exports to IIO framework the following data channels:
+ * X Axis (16 bit signed in little endian)
+ * Y Axis (16 bit signed in little endian)
+ * Z Axis (16 bit signed in little endian)
+ * Timestamp (64 bit signed in little endian)
+ * Accelerometer exports to IIO framework the following event channels:
+ * Flush event done
+ */
 static const struct iio_chan_spec st_lsm6dso_acc_channels[] = {
 	ST_LSM6DSO_DATA_CHANNEL(IIO_ACCEL, ST_LSM6DSO_REG_OUTX_L_A_ADDR,
 				1, IIO_MOD_X, 0, 16, 16, 's'),
@@ -212,6 +235,17 @@ static const struct iio_chan_spec st_lsm6dso_acc_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(3),
 };
 
+/**
+ * Gyro IIO channels description
+ *
+ * Gyro exports to IIO framework the following data channels:
+ * X Axis (16 bit signed in little endian)
+ * Y Axis (16 bit signed in little endian)
+ * Z Axis (16 bit signed in little endian)
+ * Timestamp (64 bit signed in little endian)
+ * Gyro exports to IIO framework the following event channels:
+ * Flush event done
+ */
 static const struct iio_chan_spec st_lsm6dso_gyro_channels[] = {
 	ST_LSM6DSO_DATA_CHANNEL(IIO_ANGL_VEL, ST_LSM6DSO_REG_OUTX_L_G_ADDR,
 				1, IIO_MOD_X, 0, 16, 16, 's'),
@@ -224,6 +258,15 @@ static const struct iio_chan_spec st_lsm6dso_gyro_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(3),
 };
 
+/**
+ * Step Counter IIO channels description
+ *
+ * Step Counter exports to IIO framework the following data channels:
+ * Step Counters (16 bit unsigned in little endian)
+ * Timestamp (64 bit signed in little endian)
+ * Step Counter exports to IIO framework the following event channels:
+ * Flush event done
+ */
 static const struct iio_chan_spec st_lsm6dso_step_counter_channels[] = {
 	{
 		.type = IIO_STEP_COUNTER,
@@ -240,21 +283,47 @@ static const struct iio_chan_spec st_lsm6dso_step_counter_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
 
+/**
+ * @brief  Step Detector IIO channels description
+ *
+ * Step Detector exports to IIO framework the following event channels:
+ * Step detection event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_step_detector_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_STEP_DETECTOR, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Significant Motion IIO channels description
+ *
+ * Significant Motion exports to IIO framework the following event channels:
+ * Significant Motion event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_sign_motion_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_SIGN_MOTION, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Tilt IIO channels description
+ *
+ * Tilt exports to IIO framework the following event channels:
+ * Tilt event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_tilt_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_TILT, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Temperature IIO channels description
+ *
+ * Temperature exports to IIO framework the following data channels:
+ * Temperature (16 bit signed in little endian)
+ * Temperature exports to IIO framework the following event channels:
+ * Temperature event threshold
+ */
 static const struct iio_chan_spec st_lsm6dso_temp_channels[] = {
 	{
 		.type = IIO_TEMP,
@@ -276,31 +345,68 @@ static const struct iio_chan_spec st_lsm6dso_temp_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
 
+/**
+ * Glance IIO channels description
+ *
+ * Glance exports to IIO framework the following event channels:
+ * Glance event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_glance_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Motion IIO channels description
+ *
+ * Motion exports to IIO framework the following event channels:
+ * Motion event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_motion_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * No Motion IIO channels description
+ *
+ * No Motion exports to IIO framework the following event channels:
+ * No Motion event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_no_motion_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Wakeup IIO channels description
+ *
+ * Wakeup exports to IIO framework the following event channels:
+ * Wakeup event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_wakeup_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Pickup IIO channels description
+ *
+ * Pickup exports to IIO framework the following event channels:
+ * Pickup event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_pickup_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
 };
 
+/**
+ * Orientation IIO channels description
+ *
+ * Orientation exports to IIO framework the following data channels:
+ * Orientation (8 bit unsigned in little endian)
+ * Timestamp (64 bit signed in little endian)
+ */
 static const struct iio_chan_spec st_lsm6dso_orientation_channels[] = {
 	{
 		.type = IIO_GESTURE,
@@ -314,6 +420,12 @@ static const struct iio_chan_spec st_lsm6dso_orientation_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
 
+/**
+ * Wrist IIO channels description
+ *
+ * Wrist exports to IIO framework the following event channels:
+ * Wrist event detection
+ */
 static const struct iio_chan_spec st_lsm6dso_wrist_channels[] = {
 	ST_LSM6DSO_EVENT_CHANNEL(IIO_GESTURE, IIO_EV_TYPE_THRESH,
 				 IIO_EV_DIR_RISING),
@@ -345,6 +457,14 @@ out:
 	return err;
 }
 
+/**
+ * Detect device ID
+ *
+ * Check the value of the Device ID if valid
+ *
+ * @param  hw: ST IMU MEMS hw instance
+ * @return  0 if OK, negative value for ERROR
+ */
 static int st_lsm6dso_check_whoami(struct st_lsm6dso_hw *hw)
 {
 	int err;
@@ -365,6 +485,14 @@ static int st_lsm6dso_check_whoami(struct st_lsm6dso_hw *hw)
 	return 0;
 }
 
+/**
+ * Get timestamp calibration
+ *
+ * Read timestamp calibration data and trim delta time
+ *
+ * @param  hw: ST IMU MEMS hw instance
+ * @return  0 if OK, negative value for ERROR
+ */
 static int st_lsm6dso_get_odr_calibration(struct st_lsm6dso_hw *hw)
 {
 	int err;
@@ -388,8 +516,16 @@ static int st_lsm6dso_get_odr_calibration(struct st_lsm6dso_hw *hw)
 	return 0;
 }
 
-static int st_lsm6dso_set_full_scale(struct st_lsm6dso_sensor *sensor,
-				     u32 gain)
+/**
+ * Set sensor Full Scale
+ *
+ * Set new Full Scale value for a specific sensor
+ *
+ * @param  sensor: ST IMU sensor instance
+ * @param  gain: New gain value
+ * @return  0 if OK, negative value for ERROR
+ */
+static int st_lsm6dso_set_full_scale(struct st_lsm6dso_sensor *sensor, u32 gain)
 {
 	enum st_lsm6dso_sensor_id id = sensor->id;
 	int i, err;
@@ -404,9 +540,9 @@ static int st_lsm6dso_set_full_scale(struct st_lsm6dso_sensor *sensor,
 
 	val = st_lsm6dso_fs_table[id].fs_avl[i].val;
 	err = st_lsm6dso_write_with_mask(sensor->hw,
-					 st_lsm6dso_fs_table[id].fs_avl[i].reg.addr,
-					 st_lsm6dso_fs_table[id].fs_avl[i].reg.mask,
-					 val);
+				st_lsm6dso_fs_table[id].fs_avl[i].reg.addr,
+				st_lsm6dso_fs_table[id].fs_avl[i].reg.mask,
+				val);
 	if (err < 0)
 		return err;
 
@@ -415,6 +551,19 @@ static int st_lsm6dso_set_full_scale(struct st_lsm6dso_sensor *sensor,
 	return 0;
 }
 
+/**
+ * Get a valid ODR
+ *
+ * Check a valid ODR closest to the passed value
+ *
+ * @param  id: Sensor Identifier
+ * @param  odr: Most significant part of ODR value (in Hz).
+ * @param  uodr: Least significant part of ODR value (in micro Hz).
+ * @param  podr: User data pointer.
+ * @param  puodr: User data pointer.
+ * @param  val: ODR register value data pointer.
+ * @return  0 if OK, negative value for ERROR
+ */
 int st_lsm6dso_get_odr_val(enum st_lsm6dso_sensor_id id, int odr, int uodr,
 			   int *podr, int *puodr, u8 *val)
 {
@@ -461,6 +610,15 @@ static u16 st_lsm6dso_check_odr_dependency(struct st_lsm6dso_hw *hw,
 	return ret;
 }
 
+/**
+ * Set new ODR to sensor
+ * Set a valid ODR closest to the passed value
+ *
+ * @param  sensor: ST IMU sensor instance
+ * @param  req_odr: Most significant part of ODR value (in Hz).
+ * @param  req_uodr: Least significant part of ODR value (in micro Hz).
+ * @return  0 if OK, negative value for ERROR
+ */
 static int st_lsm6dso_set_odr(struct st_lsm6dso_sensor *sensor, int req_odr,
 			      int req_uodr)
 {
@@ -519,6 +677,13 @@ static int st_lsm6dso_set_odr(struct st_lsm6dso_sensor *sensor, int req_odr,
 					  val);
 }
 
+/**
+ * Enable or Disable sensor
+ *
+ * @param  sensor: ST IMU sensor instance
+ * @param  enable: Enable or disable the sensor [true,false].
+ * @return  0 if OK, negative value for ERROR
+ */
 int st_lsm6dso_sensor_set_enable(struct st_lsm6dso_sensor *sensor,
 				 bool enable)
 {
@@ -543,6 +708,14 @@ int st_lsm6dso_sensor_set_enable(struct st_lsm6dso_sensor *sensor,
 	return 0;
 }
 
+/**
+ * Single sensor read operation
+ *
+ * @param  sensor: ST IMU sensor instance
+ * @param  addr: Output data register value.
+ * @param  val: Output data buffer.
+ * @return  IIO_VAL_INT if OK, negative value for ERROR
+ */
 static int st_lsm6dso_read_oneshot(struct st_lsm6dso_sensor *sensor,
 				   u8 addr, int *val)
 {
@@ -568,6 +741,16 @@ static int st_lsm6dso_read_oneshot(struct st_lsm6dso_sensor *sensor,
 	return IIO_VAL_INT;
 }
 
+/**
+ * Read Sensor data configuration
+ *
+ * @param  iio_dev: IIO Device.
+ * @param  ch: IIO Channel.
+ * @param  val: Data Buffer (MSB).
+ * @param  val2: Data Buffer (LSB).
+ * @param  mask: Data Mask.
+ * @return  0 if OK, -EINVAL value for ERROR
+ */
 static int st_lsm6dso_read_raw(struct iio_dev *iio_dev,
 			       struct iio_chan_spec const *ch,
 			       int *val, int *val2, long mask)
@@ -627,6 +810,16 @@ static int st_lsm6dso_read_raw(struct iio_dev *iio_dev,
 	return ret;
 }
 
+/**
+ * Write Sensor data configuration
+ *
+ * @param  iio_dev: IIO Device.
+ * @param  chan: IIO Channel.
+ * @param  val: Data Buffer (MSB).
+ * @param  val2: Data Buffer (LSB).
+ * @param  mask: Data Mask.
+ * @return  0 if OK, -EINVAL value for ERROR
+ */
 static int st_lsm6dso_write_raw(struct iio_dev *iio_dev,
 				struct iio_chan_spec const *chan,
 				int val, int val2, long mask)
@@ -704,6 +897,15 @@ static int st_lsm6dso_reg_access(struct iio_dev *iio_dev, unsigned int reg,
 }
 #endif /* CONFIG_DEBUG_FS */
 
+/**
+ * Read sensor event configuration
+ *
+ * @param  iio_dev: IIO Device.
+ * @param  chan: IIO Channel.
+ * @param  type: Event Type.
+ * @param  dir: Event Direction.
+ * @return  1 if Enabled, 0 Disabled
+ */
 static int st_lsm6dso_read_event_config(struct iio_dev *iio_dev,
 					u64 event_code)
 {
@@ -713,6 +915,16 @@ static int st_lsm6dso_read_event_config(struct iio_dev *iio_dev,
 	return !!(hw->enable_mask & BIT(sensor->id));
 }
 
+/**
+ * Write sensor event configuration
+ *
+ * @param  iio_dev: IIO Device.
+ * @param  chan: IIO Channel.
+ * @param  type: Event Type.
+ * @param  dir: Event Direction.
+ * @param  state: New event state.
+ * @return  0 if OK, negative for ERROR
+ */
 static int st_lsm6dso_write_event_config(struct iio_dev *iio_dev,
 					 u64 event_code, int state)
 {
@@ -726,6 +938,16 @@ static int st_lsm6dso_write_event_config(struct iio_dev *iio_dev,
 	return err;
 }
 
+/**
+ * Get a list of available sensor ODR
+ *
+ * List of available ODR returned separated by commas
+ *
+ * @param  dev: IIO Device.
+ * @param  attr: IIO Channel attribute.
+ * @param  buf: User buffer.
+ * @return  buffer len
+ */
 static ssize_t
 st_lsm6dso_sysfs_sampling_frequency_avail(struct device *dev,
 					  struct device_attribute *attr,
@@ -753,6 +975,16 @@ st_lsm6dso_sysfs_sampling_frequency_avail(struct device *dev,
 	return len;
 }
 
+/**
+ * Get a list of available sensor Full Scale
+ *
+ * List of available Full Scale returned separated by commas
+ *
+ * @param  dev: IIO Device.
+ * @param  attr: IIO Channel attribute.
+ * @param  buf: User buffer.
+ * @return  buffer len
+ */
 static ssize_t st_lsm6dso_sysfs_scale_avail(struct device *dev,
 					    struct device_attribute *attr,
 					    char *buf)
@@ -769,6 +1001,15 @@ static ssize_t st_lsm6dso_sysfs_scale_avail(struct device *dev,
 	return len;
 }
 
+/**
+ * Reset step counter value
+ *
+ * @param  dev: IIO Device.
+ * @param  attr: IIO Channel attribute.
+ * @param  buf: User buffer.
+ * @param  size: User buffer size.
+ * @return  buffer len, negative for ERROR
+ */
 static ssize_t
 st_lsm6dso_sysfs_reset_step_counter(struct device *dev,
 				    struct device_attribute *attr,
@@ -1105,19 +1346,23 @@ static int st_lsm6dso_init_device(struct st_lsm6dso_hw *hw)
 	u8 drdy_reg, ef_irq_reg;
 	int err;
 
-	/* latch interrupts */
-	err = st_lsm6dso_write_with_mask(hw, ST_LSM6DSO_REG_TAP_CFG0_ADDR,
+	/* configure latch interrupts enabled */
+	err = st_lsm6dso_write_with_mask(hw,
+					 ST_LSM6DSO_REG_TAP_CFG0_ADDR,
 					 ST_LSM6DSO_REG_LIR_MASK, 1);
 	if (err < 0)
 		return err;
 
 	/* enable Block Data Update */
-	err = st_lsm6dso_write_with_mask(hw, ST_LSM6DSO_REG_CTRL3_C_ADDR,
+	err = st_lsm6dso_write_with_mask(hw,
+					 ST_LSM6DSO_REG_CTRL3_C_ADDR,
 					 ST_LSM6DSO_REG_BDU_MASK, 1);
 	if (err < 0)
 		return err;
 
-	err = st_lsm6dso_write_with_mask(hw, ST_LSM6DSO_REG_CTRL5_C_ADDR,
+	/* enable rouding for fast FIFO reading */
+	err = st_lsm6dso_write_with_mask(hw,
+					 ST_LSM6DSO_REG_CTRL5_C_ADDR,
 					 ST_LSM6DSO_REG_ROUNDING_MASK, 3);
 	if (err < 0)
 		return err;
@@ -1129,10 +1374,12 @@ static int st_lsm6dso_init_device(struct st_lsm6dso_hw *hw)
 	if (err < 0)
 		return err;
 
+	/* configure interrupt registers */
 	err = st_lsm6dso_get_int_reg(hw, &drdy_reg, &ef_irq_reg);
 	if (err < 0)
 		return err;
 
+	/* Enable DRDY MASK for filters settling time */
 	err = st_lsm6dso_write_with_mask(hw, ST_LSM6DSO_REG_CTRL4_C_ADDR,
 					 ST_LSM6DSO_REG_DRDY_MASK, 1);
 	if (err < 0)
@@ -1154,6 +1401,13 @@ static int st_lsm6dso_init_device(struct st_lsm6dso_hw *hw)
 	return st_lsm6dso_fsm_init(hw);
 }
 
+/**
+ * Allocate IIO device
+ *
+ * @param  hw: ST IMU MEMS hw instance.
+ * @param  id: Sensor Identifier.
+ * @retval  struct iio_dev *, NULL if ERROR
+ */
 static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 					       enum st_lsm6dso_sensor_id id)
 {
@@ -1188,7 +1442,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		sensor->max_watermark = ST_LSM6DSO_MAX_FIFO_DEPTH;
 		sensor->odr = st_lsm6dso_odr_table[id].odr_avl[1].hz;
 		sensor->uodr = st_lsm6dso_odr_table[id].odr_avl[1].uhz;
-		sensor->gain = st_lsm6dso_fs_table[id].fs_avl[0].gain;
+		st_lsm6dso_set_full_scale(sensor,
+				st_lsm6dso_fs_table[id].fs_avl[1].gain);
 		break;
 	case ST_LSM6DSO_ID_GYRO:
 		iio_dev->channels = st_lsm6dso_gyro_channels;
@@ -1201,7 +1456,9 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		sensor->batch_reg.mask = ST_LSM6DSO_REG_BDR_GY_MASK;
 		sensor->max_watermark = ST_LSM6DSO_MAX_FIFO_DEPTH;
 		sensor->odr = st_lsm6dso_odr_table[id].odr_avl[1].hz;
-		sensor->gain = st_lsm6dso_fs_table[id].fs_avl[0].gain;
+		sensor->uodr = st_lsm6dso_odr_table[id].odr_avl[1].uhz;
+		st_lsm6dso_set_full_scale(sensor,
+				st_lsm6dso_fs_table[id].fs_avl[2].gain);
 		break;
 	case ST_LSM6DSO_ID_TEMP:
 		iio_dev->channels = st_lsm6dso_temp_channels;
@@ -1223,7 +1480,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 			ARRAY_SIZE(st_lsm6dso_step_counter_channels);
 		iio_dev->name = "lsm6dso_step_c";
 		iio_dev->info = &st_lsm6dso_step_counter_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->max_watermark = 1;
 		sensor->odr =
@@ -1237,7 +1495,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 			ARRAY_SIZE(st_lsm6dso_step_detector_channels);
 		iio_dev->name = "lsm6dso_step_d";
 		iio_dev->info = &st_lsm6dso_step_detector_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1250,7 +1509,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 			ARRAY_SIZE(st_lsm6dso_sign_motion_channels);
 		iio_dev->name = "lsm6dso_sign_motion";
 		iio_dev->info = &st_lsm6dso_sign_motion_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1262,7 +1522,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_tilt_channels);
 		iio_dev->name = "lsm6dso_tilt";
 		iio_dev->info = &st_lsm6dso_tilt_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1274,7 +1535,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_glance_channels);
 		iio_dev->name = "lsm6dso_glance";
 		iio_dev->info = &st_lsm6dso_glance_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1286,7 +1548,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_motion_channels);
 		iio_dev->name = "lsm6dso_motion";
 		iio_dev->info = &st_lsm6dso_motion_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1295,10 +1558,12 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		break;
 	case ST_LSM6DSO_ID_NO_MOTION:
 		iio_dev->channels = st_lsm6dso_no_motion_channels;
-		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_no_motion_channels);
+		iio_dev->num_channels =
+				ARRAY_SIZE(st_lsm6dso_no_motion_channels);
 		iio_dev->name = "lsm6dso_no_motion";
 		iio_dev->info = &st_lsm6dso_no_motion_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1310,7 +1575,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_wakeup_channels);
 		iio_dev->name = "lsm6dso_wk";
 		iio_dev->info = &st_lsm6dso_wakeup_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1322,7 +1588,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_pickup_channels);
 		iio_dev->name = "lsm6dso_pickup";
 		iio_dev->info = &st_lsm6dso_pickup_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1331,10 +1598,12 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		break;
 	case ST_LSM6DSO_ID_ORIENTATION:
 		iio_dev->channels = st_lsm6dso_orientation_channels;
-		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_orientation_channels);
+		iio_dev->num_channels =
+				ARRAY_SIZE(st_lsm6dso_orientation_channels);
 		iio_dev->name = "lsm6dso_dev_orientation";
 		iio_dev->info = &st_lsm6dso_orientation_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1346,7 +1615,8 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 		iio_dev->num_channels = ARRAY_SIZE(st_lsm6dso_wrist_channels);
 		iio_dev->name = "lsm6dso_wrist";
 		iio_dev->info = &st_lsm6dso_wrist_info;
-		iio_dev->available_scan_masks = st_lsm6dso_sc_available_scan_masks;
+		iio_dev->available_scan_masks =
+					st_lsm6dso_sc_available_scan_masks;
 
 		sensor->odr =
 			st_lsm6dso_odr_table[ST_LSM6DSO_ID_ACC].odr_avl[2].hz;
@@ -1361,6 +1631,15 @@ static struct iio_dev *st_lsm6dso_alloc_iiodev(struct st_lsm6dso_hw *hw,
 	return iio_dev;
 }
 
+/**
+ * Probe device function
+ * Implements [MODULE] feature for Power Management
+ *
+ * @param  dev: Device pointer.
+ * @param  irq: I2C/SPI client irq.
+ * @param  tf_ops: Bus Transfer Function pointer.
+ * @retval  struct iio_dev *, NULL if ERROR
+ */
 int st_lsm6dso_probe(struct device *dev, int irq,
 		     const struct st_lsm6dso_transfer_function *tf_ops)
 {
@@ -1535,6 +1814,13 @@ out_lock:
        return err;
 }
 
+/**
+ * Power Management suspend callback [MODULE]
+ * Implements [MODULE] feature for Power Management
+ *
+ * @param  dev: Device pointer.
+ * @retval  0 is OK, negative value if ERROR
+ */
 static int __maybe_unused st_lsm6dso_suspend(struct device *dev)
 {
 	struct st_lsm6dso_hw *hw = dev_get_drvdata(dev);
@@ -1573,6 +1859,13 @@ static int __maybe_unused st_lsm6dso_suspend(struct device *dev)
 	return err < 0 ? err : 0;
 }
 
+/**
+ * Power Management resume callback [MODULE]
+ * Implements [MODULE] feature for Power Management
+ *
+ * @param  dev: Device pointer.
+ * @retval  0 is OK, negative value if ERROR
+ */
 static int __maybe_unused st_lsm6dso_resume(struct device *dev)
 {
 	struct st_lsm6dso_hw *hw = dev_get_drvdata(dev);
