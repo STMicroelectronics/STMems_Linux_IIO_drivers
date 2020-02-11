@@ -121,9 +121,9 @@ struct st_lsm6dsr_fs {
 	u8 val;
 };
 
-#define ST_LSM6DSR_FS_LIST_SIZE		5
-#define ST_LSM6DSR_FS_ACC_LIST_SIZE	4
-#define ST_LSM6DSR_FS_GYRO_LIST_SIZE	5
+#define ST_LSM6DSR_FS_LIST_SIZE			5
+#define ST_LSM6DSR_FS_ACC_LIST_SIZE		4
+#define ST_LSM6DSR_FS_GYRO_LIST_SIZE		5
 #define ST_LSM6DSR_FS_TEMP_LIST_SIZE		1
 struct st_lsm6dsr_fs_table_entry {
 	u8 size;
@@ -389,4 +389,5 @@ int st_lsm6dsr_embfunc_sensor_set_enable(struct st_lsm6dsr_sensor *sensor,
 int st_lsm6dsr_step_counter_set_enable(struct st_lsm6dsr_sensor *sensor,
 				       bool enable);
 int st_lsm6dsr_reset_step_counter(struct iio_dev *iio_dev);
+int st_lsm6dsr_update_batching(struct iio_dev *iio_dev, bool enable);
 #endif /* ST_LSM6DSR_H */
