@@ -26,3 +26,4 @@ obj-y += st_asm330lhh/
 obj-y += st_ism330dlc/
 obj-y += st_imu68/
 obj-y += st_lsm6dsr/
+obj-y += st_ism330dhcx/
