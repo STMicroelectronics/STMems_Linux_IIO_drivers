@@ -48,6 +48,7 @@ source "drivers/iio/imu/st_ism330dlc/Kconfig"
 source "drivers/iio/imu/st_imu68/Kconfig"
 source "drivers/iio/imu/st_asm330lhh/Kconfig"
 source "drivers/iio/imu/st_lsm6dsr/Kconfig"
+source "drivers/iio/imu/st_ism330dhcx/Kconfig"
 
 endmenu
 
