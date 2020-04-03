@@ -310,6 +310,7 @@ enum {
  * @uodr: Output data rate of the sensor [uHz].
  * @max_watermark: Max supported watermark level.
  * @watermark: Sensor watermark level.
+ * @last_fifo_timestamp: Store last sample timestamp in FIFO, used by flush
  */
 struct st_asm330lhh_sensor {
 	enum st_asm330lhh_sensor_id id;
@@ -330,6 +331,7 @@ struct st_asm330lhh_sensor {
 
 			u16 max_watermark;
 			u16 watermark;
+			s64 last_fifo_timestamp;
 		};
 
 		/* sensor specific data configuration */
