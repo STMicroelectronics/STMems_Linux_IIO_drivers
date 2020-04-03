@@ -282,16 +282,18 @@ static int st_asm330lhh_read_fifo(struct st_asm330lhh_hw *hw)
 				else
 					hw->tsample = hw->tsample + hw->hw_ts - hw_ts_old;
 			} else {
+				struct st_asm330lhh_sensor *sensor;
+
 				iio_dev = st_asm330lhh_get_iiodev_from_tag(hw, tag);
 				if (!iio_dev)
 					continue;
+
+				sensor = iio_priv(iio_dev);
 
 				/* skip samples if not ready */
 				drdymask = (s16)le16_to_cpu(get_unaligned_le16(ptr));
 				if (unlikely(drdymask >= ST_ASM330LHH_SAMPLE_DISCHARD)) {
 #ifdef ST_ASM330LHH_DEBUG_DISCHARGE
-					struct st_asm330lhh_sensor *sensor = iio_priv(iio_dev);
-
 					sensor->discharged_samples++;
 #endif /* ST_ASM330LHH_DEBUG_DISCHARGE */
 					continue;
@@ -306,6 +308,7 @@ static int st_asm330lhh_read_fifo(struct st_asm330lhh_hw *hw)
 				iio_push_to_buffers_with_timestamp(iio_dev,
 								   iio_buf,
 								   hw->tsample);
+				sensor->last_fifo_timestamp = hw->tsample;
 			}
 		}
 		read_len += word_len;
@@ -370,6 +373,7 @@ ssize_t st_asm330lhh_flush_fifo(struct device *dev,
 	s64 event;
 	int count;
 	s64 type;
+	s64 fts;
 	s64 ts;
 
 	mutex_lock(&hw->fifo_lock);
@@ -379,12 +383,16 @@ ssize_t st_asm330lhh_flush_fifo(struct device *dev,
 	set_bit(ST_ASM330LHH_HW_FLUSH, &hw->state);
 
 	count = st_asm330lhh_read_fifo(hw);
+	if (count > 0)
+		fts = sensor->last_fifo_timestamp;
+	else
+		fts = ts;
 	mutex_unlock(&hw->fifo_lock);
 
 	type = count > 0 ? IIO_EV_DIR_FIFO_DATA : IIO_EV_DIR_FIFO_EMPTY;
 	event = IIO_UNMOD_EVENT_CODE(iio_dev->channels[0].type, -1,
 				     IIO_EV_TYPE_FIFO_FLUSH, type);
-	iio_push_event(iio_dev, event, st_asm330lhh_get_time_ns());
+	iio_push_event(iio_dev, event, fts);
 
 	return size;
 }
