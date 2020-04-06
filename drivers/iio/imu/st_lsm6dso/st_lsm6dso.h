@@ -377,6 +377,7 @@ enum st_lsm6dso_fifo_status {
  * max_watermark: Max supported watermark level
  * watermark: Sensor watermark level
  * batch_reg: Sensor reg/mask for FIFO batching register
+ * last_fifo_timestamp: Store last sample timestamp in FIFO, used by flush
  */
 struct st_lsm6dso_sensor {
 	enum st_lsm6dso_sensor_id id;
@@ -398,6 +399,7 @@ struct st_lsm6dso_sensor {
 	u16 watermark;
 
 	struct st_lsm6dso_reg batch_reg;
+	s64 last_fifo_timestamp;
 };
 
 /**
