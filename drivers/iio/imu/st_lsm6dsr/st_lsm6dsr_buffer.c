@@ -412,6 +412,7 @@ static int st_lsm6dsr_read_fifo(struct st_lsm6dsr_hw *hw)
 				hw->tsample = min_t(s64,
 						    st_lsm6dsr_get_time_ns(),
 						    hw->tsample);
+				sensor->last_fifo_timestamp = hw->tsample;
 
 				/* support decimation for ODR < 12.5 Hz */
 				if (sensor->dec_counter > 0) {
@@ -524,6 +525,7 @@ ssize_t st_lsm6dsr_flush_fifo(struct device *dev,
 	s64 type;
 	s64 event;
 	int count;
+	s64 fts;
 	s64 ts;
 
 	mutex_lock(&hw->fifo_lock);
@@ -534,11 +536,15 @@ ssize_t st_lsm6dsr_flush_fifo(struct device *dev,
 	count = st_lsm6dsr_read_fifo(hw);
 	sensor->dec_counter = 0;
 	mutex_unlock(&hw->fifo_lock);
+	if (count > 0)
+		fts = sensor->last_fifo_timestamp;
+	else
+		fts = ts;
 
 	type = count > 0 ? IIO_EV_DIR_FIFO_DATA : IIO_EV_DIR_FIFO_EMPTY;
 	event = IIO_UNMOD_EVENT_CODE(iio_dev->channels[0].type, -1,
 				     IIO_EV_TYPE_FIFO_FLUSH, type);
-	iio_push_event(iio_dev, event, st_lsm6dsr_get_time_ns());
+	iio_push_event(iio_dev, event, fts);
 
 	return size;
 }
