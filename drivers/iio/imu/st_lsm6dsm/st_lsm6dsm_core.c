@@ -162,7 +162,7 @@
 #define ST_LSM6DSM_GYRO_STD_13HZ			2
 #define ST_LSM6DSM_GYRO_STD_52HZ			3
 #define ST_LSM6DSM_GYRO_STD_104HZ			5
-#define ST_LSM6DSM_GYRO_STD_208HZ			8
+#define ST_LSM6DSM_GYRO_STD_208HZ			16	
 #define ST_LSM6DSM_SELFTEST_GYRO_ADDR			0x11
 #define ST_LSM6DSM_SELFTEST_GYRO_REG_VALUE		0x4c
 #define ST_LSM6DSM_SELFTEST_GYRO_MIN			2142
@@ -2061,6 +2061,9 @@ static ssize_t st_lsm6dsm_sysfs_set_sampling_frequency(struct device *dev,
 	if (err < 0)
 		return err;
 
+	if (odr == 12)
+		odr++;
+
 	mutex_lock(&indio_dev->mlock);
 
 	mutex_lock(&sdata->cdata->odr_lock);
@@ -2091,8 +2094,11 @@ static ssize_t st_lsm6dsm_sysfs_sampling_frequency_avail(struct device *dev,
 	int i, len = 0;
 
 	for (i = 0; i < ST_LSM6DSM_ODR_LIST_NUM; i++) {
-		len += scnprintf(buf + len, PAGE_SIZE - len, "%d ",
-					st_lsm6dsm_odr_table.odr_avl[i].hz);
+		if (st_lsm6dsm_odr_table.odr_avl[i].hz == 13)
+			len += scnprintf(buf + len, PAGE_SIZE - len, "%d ", 12);
+		else
+			len += scnprintf(buf + len, PAGE_SIZE - len, "%d ",
+					 st_lsm6dsm_odr_table.odr_avl[i].hz);
 	}
 	buf[len - 1] = '\n';
 
