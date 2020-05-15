@@ -722,11 +722,15 @@ static bool lsm6dsm_calculate_fifo_decimators(struct lsm6dsm_data *cdata,
 
 #ifdef CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT
 	if ((accel_decimator == cdata->hwfifo_decimator[ST_MASK_ID_ACCEL]) &&
-			(ext_decimator == cdata->hwfifo_decimator[ST_MASK_ID_EXT0]) &&
-			(gyro_decimator == cdata->hwfifo_decimator[ST_MASK_ID_GYRO])) {
+	    (ext_decimator == cdata->hwfifo_decimator[ST_MASK_ID_EXT0]) &&
+	    (gyro_decimator == cdata->hwfifo_decimator[ST_MASK_ID_GYRO])) {
+		if (cdata->fifo_output[ST_MASK_ID_EXT0].decimator != new_fifo_decimator[ST_MASK_ID_EXT0]) {
+		return true;
+		}
+
 #else /* CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT */
 	if ((accel_decimator == cdata->hwfifo_decimator[ST_MASK_ID_ACCEL]) &&
-			(gyro_decimator == cdata->hwfifo_decimator[ST_MASK_ID_GYRO])) {
+	    (gyro_decimator == cdata->hwfifo_decimator[ST_MASK_ID_GYRO])) {
 #endif /* CONFIG_ST_LSM6DSM_IIO_MASTER_SUPPORT */
 		return false;
 	}
