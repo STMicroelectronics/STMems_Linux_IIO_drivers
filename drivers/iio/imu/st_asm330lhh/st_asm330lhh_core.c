@@ -628,7 +628,7 @@ static int st_asm330lhh_set_full_scale(struct st_asm330lhh_sensor *sensor,
 		return 0;
 
 	for (i = 0; i < st_asm330lhh_fs_table[id].size; i++)
-		if (st_asm330lhh_fs_table[id].fs_avl[i].gain == gain)
+		if (st_asm330lhh_fs_table[id].fs_avl[i].gain >= gain)
 			break;
 
 	if (i == st_asm330lhh_fs_table[id].size)
@@ -642,7 +642,7 @@ static int st_asm330lhh_set_full_scale(struct st_asm330lhh_sensor *sensor,
 	if (err < 0)
 		return err;
 
-	sensor->gain = gain;
+	sensor->gain = st_asm330lhh_fs_table[id].fs_avl[i].gain;
 
 	return 0;
 }
@@ -864,7 +864,7 @@ static int st_asm330lhh_read_raw(struct iio_dev *iio_dev,
 		case IIO_ANGL_VEL:
 			*val = 0;
 			*val2 = sensor->gain;
-			ret = IIO_VAL_INT_PLUS_MICRO;
+			ret = IIO_VAL_INT_PLUS_NANO;
 			break;
 		default:
 			return -EINVAL;
@@ -962,7 +962,7 @@ static ssize_t st_asm330lhh_sysfs_scale_avail(struct device *dev,
 	int i, len = 0;
 
 	for (i = 0; i < st_asm330lhh_fs_table[id].size; i++)
-		len += scnprintf(buf + len, PAGE_SIZE - len, "0.%06u ",
+		len += scnprintf(buf + len, PAGE_SIZE - len, "0.%09u ",
 				 st_asm330lhh_fs_table[id].fs_avl[i].gain);
 	buf[len - 1] = '\n';
 
@@ -996,6 +996,28 @@ ssize_t __maybe_unused st_asm330lhh_get_discharded_samples(struct device *dev,
 
 	return ret;
 }
+
+static int st_asm330lhh_write_raw_get_fmt(struct iio_dev *indio_dev,
+			struct iio_chan_spec const *chan, long mask)
+{
+	switch (mask) {
+	case IIO_CHAN_INFO_SCALE:
+		switch (chan->type) {
+		case IIO_ANGL_VEL:
+		case IIO_ACCEL:
+			return IIO_VAL_INT_PLUS_NANO;
+		case IIO_TEMP:
+			return IIO_VAL_FRACTIONAL;
+		default:
+			return IIO_VAL_INT_PLUS_MICRO;
+		}
+	default:
+		return IIO_VAL_INT_PLUS_MICRO;
+	}
+
+	return -EINVAL;
+}
+
 static IIO_DEVICE_ATTR(discharded_samples, 0444,
 		       st_asm330lhh_get_discharded_samples, NULL, 0);
 
@@ -1019,6 +1041,7 @@ static const struct iio_info st_asm330lhh_acc_info = {
 	.attrs = &st_asm330lhh_acc_attribute_group,
 	.read_raw = st_asm330lhh_read_raw,
 	.write_raw = st_asm330lhh_write_raw,
+	.write_raw_get_fmt = &st_asm330lhh_write_raw_get_fmt,
 #ifdef CONFIG_DEBUG_FS
 	.debugfs_reg_access = &st_asm330lhh_reg_access,
 #endif /* CONFIG_DEBUG_FS */
@@ -1044,6 +1067,7 @@ static const struct iio_info st_asm330lhh_gyro_info = {
 	.attrs = &st_asm330lhh_gyro_attribute_group,
 	.read_raw = st_asm330lhh_read_raw,
 	.write_raw = st_asm330lhh_write_raw,
+	.write_raw_get_fmt = &st_asm330lhh_write_raw_get_fmt,
 };
 
 static struct attribute *st_asm330lhh_temp_attributes[] = {
