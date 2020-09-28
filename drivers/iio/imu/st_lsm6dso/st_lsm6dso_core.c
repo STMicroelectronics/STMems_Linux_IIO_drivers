@@ -1321,14 +1321,14 @@ static int st_lsm6dso_reset_device(struct st_lsm6dso_hw *hw)
 	if (err < 0)
 		return err;
 
-	usleep_range(15, 20);
+	msleep(20);
 
 	/* boot */
 	err = st_lsm6dso_write_with_mask(hw,
 					 ST_LSM6DSO_REG_CTRL3_C_ADDR,
 					 ST_LSM6DSO_REG_BOOT_MASK, 1);
 
-	msleep(20);
+	msleep(50);
 
 	return err;
 }
