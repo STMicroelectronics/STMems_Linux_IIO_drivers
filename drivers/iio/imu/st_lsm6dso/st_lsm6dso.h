@@ -462,6 +462,7 @@ struct st_lsm6dso_hw {
 	s64 tsample;
 	s64 delta_ts;
 	s64 ts;
+	u8 i2c_master_pu;
 
 	struct iio_dev *iio_devs[ST_LSM6DSO_ID_MAX];
 
