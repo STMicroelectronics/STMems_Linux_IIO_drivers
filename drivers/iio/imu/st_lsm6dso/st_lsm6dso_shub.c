@@ -13,11 +13,13 @@
 #include <linux/iio/iio.h>
 #include <linux/iio/sysfs.h>
 #include <asm/unaligned.h>
+#include <linux/of.h>
 
 #include "st_lsm6dso.h"
 
 #define ST_LSM6DSO_REG_MASTER_CONFIG_ADDR	0x14
 #define ST_LSM6DSO_REG_WRITE_ONCE_MASK		BIT(6)
+#define ST_LSM6DSO_REG_SHUB_PU_EN_MASK      	BIT(3)
 #define ST_LSM6DSO_REG_MASTER_ON_MASK		BIT(2)
 
 #define ST_LSM6DSO_REG_SLV0_ADDR		0x15
@@ -403,11 +405,11 @@ static int st_lsm6dso_shub_write(struct st_lsm6dso_sensor *sensor, u8 addr,
 {
 	struct st_lsm6dso_ext_dev_info *ext_info = &sensor->ext_dev_info;
 	struct st_lsm6dso_hw *hw = sensor->hw;
-	u8 mconfig = ST_LSM6DSO_REG_WRITE_ONCE_MASK | 3;
+	u8 mconfig = ST_LSM6DSO_REG_WRITE_ONCE_MASK | 3 | hw->i2c_master_pu;
 	u8 config[3] = {};
 	int err, i;
 
-	/* AuxSens = 3 + wr once */
+	/* AuxSens = 3 + wr once + pull up configuration */
 	err = st_lsm6dso_shub_write_reg(hw, ST_LSM6DSO_REG_MASTER_CONFIG_ADDR,
 					&mconfig, sizeof(mconfig));
 	if (err < 0)
@@ -928,6 +930,25 @@ int st_lsm6dso_shub_probe(struct st_lsm6dso_hw *hw)
 	u8 config[3], data, num_ext_dev = 0;
 	enum st_lsm6dso_sensor_id id;
 	int err, i = 0, j;
+	struct device_node *np = hw->dev->of_node;
+
+	if (np && of_property_read_bool(np, "drive-pullup-shub")) {
+		dev_err(hw->dev, "enabling pull up on i2c master\n");
+		err = st_lsm6dso_shub_read_reg(hw,
+					       ST_LSM6DSO_REG_MASTER_CONFIG_ADDR,
+					       &data, sizeof(data));
+		if (err < 0)
+			return err;
+
+		data |= ST_LSM6DSO_REG_SHUB_PU_EN_MASK;
+		err = st_lsm6dso_shub_write_reg(hw, ST_LSM6DSO_REG_MASTER_CONFIG_ADDR,
+						&data, sizeof(data));
+
+		if (err < 0)
+			return err;
+
+		hw->i2c_master_pu = ST_LSM6DSO_REG_SHUB_PU_EN_MASK;
+	}
 
 	acc_sensor = iio_priv(hw->iio_devs[ST_LSM6DSO_ID_ACC]);
 	while (i < ARRAY_SIZE(st_lsm6dso_ext_dev_table) &&
@@ -997,7 +1018,7 @@ int st_lsm6dso_shub_probe(struct st_lsm6dso_hw *hw)
 		return err;
 
 	/* AuxSens = 3 + wr once */
-	data = ST_LSM6DSO_REG_WRITE_ONCE_MASK | 3;
+	data = ST_LSM6DSO_REG_WRITE_ONCE_MASK | 3 | hw->i2c_master_pu;
 	return st_lsm6dso_shub_write_reg(hw, ST_LSM6DSO_REG_MASTER_CONFIG_ADDR,
 					 &data, sizeof(data));
 }
