@@ -14,13 +14,14 @@
 #include <linux/device.h>
 #include <linux/iio/iio.h>
 
+#define ST_ASM330LHH_DRV_VERSION		"1.1"
 #define ST_ASM330LHH_DEBUG_DISCHARGE
 
-#define ST_ASM330LHH_MAX_ODR 		833
-#define ST_ASM330LHH_ODR_LIST_SIZE	8
+#define ST_ASM330LHH_MAX_ODR			833
+#define ST_ASM330LHH_ODR_LIST_SIZE		8
 #define ST_ASM330LHH_ODR_EXPAND(odr, uodr)	((odr * 1000000) + uodr)
 
-#define ST_ASM330LHH_DEV_NAME		"asm330lhh"
+#define ST_ASM330LHH_DEV_NAME			"asm330lhh"
 
 #define ST_ASM330LHH_REG_FIFO_CTRL1_ADDR	0x07
 #define ST_ASM330LHH_REG_FIFO_CTRL2_ADDR	0x08
