@@ -4,6 +4,7 @@
  * Copyright 2019 STMicroelectronics Inc.
  *
  * Lorenzo Bianconi <lorenzo.bianconi@st.com>
+ * Mario Tesi <mario.tesi@st.com>
  *
  * Licensed under the GPL-2.
  */
