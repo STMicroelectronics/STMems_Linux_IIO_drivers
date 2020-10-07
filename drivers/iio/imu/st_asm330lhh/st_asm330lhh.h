@@ -206,6 +206,7 @@ struct st_asm330lhh_suspend_resume_entry {
 	u8 val;
 	u8 mask;
 };
+
 /**
  * struct st_asm330lhh_odr - Single ODR entry
  * @hz: Most significant part of the sensor ODR (Hz).
@@ -339,7 +340,6 @@ struct st_asm330lhh_sensor {
 			u32 conf[6];
 		};
 	};
-
 };
 
 /**
@@ -390,6 +390,9 @@ struct st_asm330lhh_hw {
 	s64 ts;
 	const struct st_asm330lhh_odr_table_entry *odr_table_entry;
 	struct iio_dev *iio_devs[ST_ASM330LHH_ID_MAX];
+
+	struct regulator *vdd_supply;
+	struct regulator *vddio_supply;
 
 	const struct st_asm330lhh_transfer_function *tf;
 	struct st_asm330lhh_transfer_buffer tb;
