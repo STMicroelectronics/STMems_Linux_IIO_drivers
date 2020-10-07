@@ -31,3 +31,11 @@ config IIO_ST_ASM330LHH_EN_TEMPERATURE
 	depends on IIO_ST_ASM330LHH
 	help
 	  Enable internal temperature sensor channel
+
+config IIO_ST_ASM330LHH_EN_REGULATOR
+	bool "Enable support to voltage regulator"
+	depends on IIO_ST_ASM330LHH
+	help
+	  Enable support to voltage regulator to power up/down the sensor
+	  Add the vdd-supply and vddio-supply entries into device tree to
+	  automatically manage the sensor power supply.
