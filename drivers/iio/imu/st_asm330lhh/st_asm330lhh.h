@@ -68,6 +68,17 @@
 
 #define ST_ASM330LHH_REG_CTRL5_C_ADDR		0x14
 #define ST_ASM330LHH_REG_ROUNDING_MASK		GENMASK(6, 5)
+#define ST_ASM330LHH_REG_ST_G_MASK		GENMASK(3, 2)
+#define ST_ASM330LHH_REG_ST_XL_MASK		GENMASK(1, 0)
+#define ST_ASM330LHH_SELFTEST_ACCEL_MIN		737
+#define ST_ASM330LHH_SELFTEST_ACCEL_MAX		13934
+#define ST_ASM330LHH_SELFTEST_GYRO_MIN		2142
+#define ST_ASM330LHH_SELFTEST_GYRO_MAX		10000
+
+#define ST_ASM330LHH_SELF_TEST_DISABLED_VAL	0
+#define ST_ASM330LHH_SELF_TEST_POS_SIGN_VAL	1
+#define ST_ASM330LHH_SELF_TEST_NEG_ACCEL_SIGN_VAL	2
+#define ST_ASM330LHH_SELF_TEST_NEG_GYRO_SIGN_VAL	3
 
 #define ST_ASM330LHH_REG_CTRL9_XL_ADDR		0x18
 #define ST_ASM330LHH_REG_DEVICE_CONF_MASK	BIT(1)
@@ -76,6 +87,8 @@
 #define ST_ASM330LHH_REG_TIMESTAMP_EN_MASK	BIT(5)
 
 #define ST_ASM330LHH_REG_STATUS_ADDR		0x1e
+#define ST_ASM330LHH_REG_STATUS_XLDA		BIT(0)
+#define ST_ASM330LHH_REG_STATUS_GDA		BIT(1)
 #define ST_ASM330LHH_REG_STATUS_TDA		BIT(2)
 
 #define ST_ASM330LHH_REG_OUT_TEMP_L_ADDR	0x20
@@ -313,6 +326,8 @@ enum {
  * @max_watermark: Max supported watermark level.
  * @watermark: Sensor watermark level.
  * @last_fifo_timestamp: Store last sample timestamp in FIFO, used by flush
+ * @selftest_status: Last status of self test output
+ * @min_st, @max_st: Min/Max acc/gyro data values during self test procedure
  */
 struct st_asm330lhh_sensor {
 	enum st_asm330lhh_sensor_id id;
@@ -334,6 +349,11 @@ struct st_asm330lhh_sensor {
 			u16 max_watermark;
 			u16 watermark;
 			s64 last_fifo_timestamp;
+
+			/* self test */
+			int8_t selftest_status;
+			int min_st;
+			int max_st;
 		};
 
 		/* sensor specific data configuration */
