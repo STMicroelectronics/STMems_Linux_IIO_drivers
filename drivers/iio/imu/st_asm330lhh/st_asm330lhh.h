@@ -15,13 +15,14 @@
 #include <linux/iio/iio.h>
 #include <linux/delay.h>
 
+#define ST_ASM330LHH_DRV_VERSION		"1.1"
 #define ST_ASM330LHH_DEBUG_DISCHARGE
 
-#define ST_ASM330LHH_MAX_ODR 		833
-#define ST_ASM330LHH_ODR_LIST_SIZE	8
+#define ST_ASM330LHH_MAX_ODR			833
+#define ST_ASM330LHH_ODR_LIST_SIZE		8
 #define ST_ASM330LHH_ODR_EXPAND(odr, uodr)	((odr * 1000000) + uodr)
 
-#define ST_ASM330LHH_DEV_NAME		"asm330lhh"
+#define ST_ASM330LHH_DEV_NAME			"asm330lhh"
 
 #define ST_ASM330LHH_DEFAULT_XL_FS_INDEX	2
 #define ST_ASM330LHH_DEFAULT_XL_ODR_INDEX	1

@@ -4,6 +4,7 @@
  * Copyright 2019 STMicroelectronics Inc.
  *
  * Lorenzo Bianconi <lorenzo.bianconi@st.com>
+ * Mario Tesi <mario.tesi@st.com>
  *
  * Licensed under the GPL-2.
  */
@@ -90,5 +91,7 @@ static struct i2c_driver st_asm330lhh_driver = {
 module_i2c_driver(st_asm330lhh_driver);
 
 MODULE_AUTHOR("Lorenzo Bianconi <lorenzo.bianconi@st.com>");
+MODULE_AUTHOR("Mario Tesi <mario.tesi@st.com>");
 MODULE_DESCRIPTION("STMicroelectronics st_asm330lhh i2c driver");
 MODULE_LICENSE("GPL v2");
+MODULE_VERSION(ST_ASM330LHH_DRV_VERSION);
