@@ -556,11 +556,9 @@ int st_asm330lhh_buffers_setup(struct st_asm330lhh_hw *hw)
 
 	switch (irq_type) {
 	case IRQF_TRIGGER_HIGH:
-	case IRQF_TRIGGER_RISING:
 		irq_active_low = false;
 		break;
 	case IRQF_TRIGGER_LOW:
-	case IRQF_TRIGGER_FALLING:
 		irq_active_low = true;
 		break;
 	default:
