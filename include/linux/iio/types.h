@@ -38,6 +38,7 @@ enum iio_chan_type {
 	IIO_HUMIDITYRELATIVE,
 	IIO_WRIST_TILT_GESTURE,
 	IIO_GESTURE,
+	IIO_ACTIVITY,
 };
 
 enum iio_modifier {
