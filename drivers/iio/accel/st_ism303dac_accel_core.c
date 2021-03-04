@@ -24,6 +24,7 @@
 #include <linux/iio/buffer.h>
 #include <linux/iio/events.h>
 #include <asm/unaligned.h>
+#include <linux/of.h>
 
 #include "st_ism303dac_accel.h"
 
