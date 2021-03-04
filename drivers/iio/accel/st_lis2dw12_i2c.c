@@ -67,6 +67,10 @@ static const struct of_device_id st_lis2dw12_i2c_of_match[] = {
 		.compatible = "st,lis2dw12",
 		.data = ST_LIS2DW12_DEV_NAME,
 	},
+	{
+		.compatible = "st,iis2dlpc",
+		.data = ST_IIS2DLPC_DEV_NAME,
+	},
 	{},
 };
 MODULE_DEVICE_TABLE(of, st_lis2dw12_i2c_of_match);
