@@ -450,7 +450,7 @@ static ssize_t lis2hh12_sysfs_sampling_frequency_avail(struct device *dev,
 {
 	int i, len = 0;
 
-	for (i = 0; i < LIS2HH12_ODR_LIST_NUM; i++) {
+	for (i = 1; i < LIS2HH12_ODR_LIST_NUM; i++) {
 		len += scnprintf(buf + len, PAGE_SIZE - len, "%d ",
 				lis2hh12_odr_table.odr_avl[i].hz);
 	}
