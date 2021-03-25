@@ -36,7 +36,9 @@ This repository contains Linux kernel v3.10 with STMicroelectronics MEMS sensor 
 
 > LPS22HB, LPS22HD, LPS25H, LPS331AP, LPS001WP, LPS33HW, LPS35HW, LPS22HH, LPS27HHW
 
+### Temperature:
 
+> STTS22H
 
 Data collected by STM sensors are pushed to userland through the kernel buffers of Linux IIO framework. User space applications can get sensor events by reading the related IIO devices created in the /dev directory (*/dev/iio{x}*). Please see [IIO][1] for more information.
 
