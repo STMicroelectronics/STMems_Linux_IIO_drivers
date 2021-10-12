@@ -574,6 +574,7 @@ static int st_lsm6dsrx_set_odr(struct st_lsm6dsrx_sensor *sensor, int req_odr,
 		for (i = ST_LSM6DSRX_ID_ACC; i < ST_LSM6DSRX_ID_MAX; i++) {
 			if (!hw->iio_devs[i] || i == sensor->id)
 				continue;
+
 			odr = st_lsm6dsrx_check_odr_dependency(hw, req_odr,
 							       req_uodr, i);
 			if (odr != req_odr) {
@@ -1103,7 +1104,7 @@ static int st_lsm6dsrx_selftest_sensor(struct st_lsm6dsrx_sensor *sensor,
 	int ret, delay;
 	u8 raw_data[6];
 
-	switch(sensor->id) {
+	switch (sensor->id) {
 	case ST_LSM6DSRX_ID_ACC:
 		reg = ST_LSM6DSRX_REG_OUTX_L_A_ADDR;
 		bitmask = ST_LSM6DSRX_REG_STATUS_XLDA;
@@ -1159,9 +1160,8 @@ static int st_lsm6dsrx_selftest_sensor(struct st_lsm6dsrx_sensor *sensor,
 				n++;
 
 				break;
-			} else {
-				try_count++;
 			}
+			try_count++;
 		}
 	}
 
@@ -1206,9 +1206,8 @@ static int st_lsm6dsrx_selftest_sensor(struct st_lsm6dsrx_sensor *sensor,
 				n++;
 
 				break;
-			} else {
-				try_count++;
 			}
+			try_count++;
 		}
 	}
 
@@ -1343,10 +1342,10 @@ static IIO_DEVICE_ATTR(power_mode, 0644,
 		       st_lsm6dsrx_get_power_mode,
 		       st_lsm6dsrx_set_power_mode, 0);
 
-static IIO_DEVICE_ATTR(selftest_available, S_IRUGO,
+static IIO_DEVICE_ATTR(selftest_available, 0444,
 		       st_lsm6dsrx_sysfs_get_selftest_available,
 		       NULL, 0);
-static IIO_DEVICE_ATTR(selftest, S_IWUSR | S_IRUGO,
+static IIO_DEVICE_ATTR(selftest, 0644,
 		       st_lsm6dsrx_sysfs_get_selftest_status,
 		       st_lsm6dsrx_sysfs_start_selftest, 0);
 
@@ -1419,7 +1418,9 @@ static const struct iio_info st_lsm6dsrx_temp_info = {
 };
 
 static const unsigned long st_lsm6dsrx_available_scan_masks[] = { 0x7, 0x0 };
-static const unsigned long st_lsm6dsrx_temp_available_scan_masks[] = { 0x1, 0x0 };
+static const unsigned long st_lsm6dsrx_temp_available_scan_masks[] = {
+	0x1, 0x0
+};
 
 static int st_lsm6dsrx_reset_device(struct st_lsm6dsrx_hw *hw)
 {
