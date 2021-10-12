@@ -629,6 +629,7 @@ static int st_lsm6dsox_set_odr(struct st_lsm6dsox_sensor *sensor, int req_odr,
 		for (i = ST_LSM6DSOX_ID_ACC; i < ST_LSM6DSOX_ID_MAX; i++) {
 			if (!hw->iio_devs[i] || i == sensor->id)
 				continue;
+
 			odr = st_lsm6dsox_check_odr_dependency(hw, req_odr,
 							       req_uodr, i);
 			if (odr != req_odr) {
@@ -1044,7 +1045,7 @@ static int st_lsm6dsox_selftest_sensor(struct st_lsm6dsox_sensor *sensor,
 	int ret, delay;
 	u8 raw_data[6];
 
-	switch(sensor->id) {
+	switch (sensor->id) {
 	case ST_LSM6DSOX_ID_ACC:
 		reg = ST_LSM6DSOX_REG_OUTX_L_A_ADDR;
 		bitmask = ST_LSM6DSOX_REG_STATUS_XLDA;
@@ -1100,9 +1101,8 @@ static int st_lsm6dsox_selftest_sensor(struct st_lsm6dsox_sensor *sensor,
 				n++;
 
 				break;
-			} else {
-				try_count++;
 			}
+			try_count++;
 		}
 	}
 
@@ -1147,9 +1147,8 @@ static int st_lsm6dsox_selftest_sensor(struct st_lsm6dsox_sensor *sensor,
 				n++;
 
 				break;
-			} else {
-				try_count++;
 			}
+			try_count++;
 		}
 	}
 
@@ -1458,10 +1457,10 @@ static IIO_DEVICE_ATTR(hwfifo_flush, 0200, NULL, st_lsm6dsox_flush_fifo, 0);
 static IIO_DEVICE_ATTR(hwfifo_watermark, 0644, st_lsm6dsox_get_watermark,
 		       st_lsm6dsox_set_watermark, 0);
 
-static IIO_DEVICE_ATTR(selftest_available, S_IRUGO,
+static IIO_DEVICE_ATTR(selftest_available, 0444,
 		       st_lsm6dsox_sysfs_get_selftest_available,
 		       NULL, 0);
-static IIO_DEVICE_ATTR(selftest, S_IWUSR | S_IRUGO,
+static IIO_DEVICE_ATTR(selftest, 0644,
 		       st_lsm6dsox_sysfs_get_selftest_status,
 		       st_lsm6dsox_sysfs_start_selftest, 0);
 
@@ -1561,8 +1560,7 @@ static struct attribute *st_lsm6dsox_step_detector_attributes[] = {
 	NULL,
 };
 
-static const struct attribute_group st_lsm6dsox_step_detector_attribute_group =
-{
+static const struct attribute_group st_lsm6dsox_step_detector_attribute_group = {
 	.attrs = st_lsm6dsox_step_detector_attributes,
 };
 
