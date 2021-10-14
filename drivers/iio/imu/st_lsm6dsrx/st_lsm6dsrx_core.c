@@ -1752,7 +1752,9 @@ int st_lsm6dsrx_remove(struct device *dev)
 {
 	struct st_lsm6dsrx_hw *hw = dev_get_drvdata(dev);
 
+#ifdef CONFIG_IIO_ST_LSM6DSRX_MLC
 	st_lsm6dsrx_mlc_remove(dev);
+#endif /* CONFIG_IIO_ST_LSM6DSRX_MLC */
 
 	return st_lsm6dsrx_deallocate_buffers(hw);
 }
