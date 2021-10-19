@@ -2003,7 +2003,9 @@ int st_lsm6dsox_remove(struct device *dev)
 {
 	struct st_lsm6dsox_hw *hw = dev_get_drvdata(dev);
 
+#ifdef CONFIG_IIO_ST_LSM6DSOX_MLC
 	st_lsm6dsox_mlc_remove(dev);
+#endif /* CONFIG_IIO_ST_LSM6DSOX_MLC */
 
 	return st_lsm6dsox_deallocate_buffers(hw);
 }
