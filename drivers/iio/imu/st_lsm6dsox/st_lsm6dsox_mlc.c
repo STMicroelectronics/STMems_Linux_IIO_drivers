@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: GPL-2.0-only
 /*
  * STMicroelectronics st_lsm6dsox machine learning core driver
  *
  * Copyright 2021 STMicroelectronics Inc.
  *
  * Tesi Mario <mario.tesi@st.com>
+ *
+ * Licensed under the GPL-2.
  */
 
 #ifdef CONFIG_IIO_ST_LSM6DSOX_MLC

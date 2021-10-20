@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: GPL-2.0-only
-
 config IIO_ST_LSM6DSRX
 	tristate "STMicroelectronics LSM6DSRX sensor"
 	depends on (I2C || SPI)
