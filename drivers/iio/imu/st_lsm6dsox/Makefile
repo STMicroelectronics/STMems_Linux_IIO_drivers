@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: GPL-2.0-only
 st_lsm6dsox-y := st_lsm6dsox_core.o \
 		 st_lsm6dsox_buffer.o \
 		 st_lsm6dsox_mlc.o \
