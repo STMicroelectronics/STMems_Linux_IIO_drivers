@@ -19,7 +19,7 @@ This repository contains Linux kernel v4.4 with STMicroelectronics MEMS sensor s
 
 > LIS2DH, LIS2DH12, LIS3DH, LIS2DG, LSM303AH, LIS2DS12, LIS2HH12, LIS2DW12, LIS3LV02DL,
 > LSM303DLH, LSM303DLHC, LSM330D, LSM330DL, LSM330DLC, LIS331DL, LIS331DLH, LSM303DL,
-> LSM303DLM, LSM330, LSM303AGR, LIS3DHH, IIS2DH, ISM303DAC, IIS3DHHC, IIS2DLPC
+> LSM303DLM, LSM330, LSM303AGR, LIS3DHH, IIS2DH, ISM303DAC, IIS3DHHC, IIS2DLPC, AIS2IH
 
 ### Gyroscope:
 
@@ -95,6 +95,8 @@ In order to explain how to integrate STM sensors in a different kernel, please c
 >         +         IIO_TAP_TAP,
 >         +         IIO_WRIST_TILT_GESTURE,
 >         +         IIO_GESTURE,
+>         +         IIO_WKUP,
+>         +         IIO_FREE_FALL,
 >         };
 
 ### Device Tree configuration
